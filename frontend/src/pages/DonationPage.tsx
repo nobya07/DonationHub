@@ -12,11 +12,13 @@ import { Card } from '../components/ui/Card';
 
 const donationSchema = z.object({
   donorName: z.string().min(1, 'Donor name is required'),
-  phone: z.string().min(1, 'Phone number is required'),
-  address: z.string().min(1, 'Address is required'),
+  phone: z
+    .string()
+    .regex(/^\d{10}$/, 'Phone number must be exactly 10 digits'),
+  address: z.string().optional(),
   amount: z.coerce.number().positive('Amount must be greater than 0'),
-  paymentMode: z.string().min(1, 'Please select a payment mode'),
-  purpose: z.string().min(1, 'Purpose is required'),
+  paymentMode: z.enum(['cash', 'upi'], { message: 'Please select a payment mode' }),
+  purpose: z.string().optional(),
   remarks: z.string().optional(),
 });
 
@@ -25,10 +27,6 @@ type DonationForm = z.infer<typeof donationSchema>;
 const PAYMENT_MODES = [
   { value: 'cash', label: 'Cash' },
   { value: 'upi', label: 'UPI' },
-  { value: 'credit_card', label: 'Credit Card' },
-  { value: 'debit_card', label: 'Debit Card' },
-  { value: 'net_banking', label: 'Net Banking' },
-  { value: 'cheque', label: 'Cheque' },
 ];
 
 interface SuccessState {
@@ -49,6 +47,7 @@ export function DonationPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<DonationForm>({
     resolver: zodResolver(donationSchema),
@@ -57,7 +56,7 @@ export function DonationPage() {
       phone: '',
       address: '',
       amount: undefined,
-      paymentMode: '',
+      paymentMode: '' as DonationForm['paymentMode'],
       purpose: '',
       remarks: '',
     },
@@ -137,10 +136,10 @@ export function DonationPage() {
         collectorName: user!.collectorName,
         donorName: data.donorName,
         phone: data.phone,
-        address: data.address,
+        address: data.address ?? '',
         amount: data.amount,
         paymentMode: data.paymentMode,
-        purpose: data.purpose,
+        purpose: data.purpose ?? '',
         remarks: data.remarks,
       });
 
@@ -194,13 +193,20 @@ export function DonationPage() {
           <Input
             label="Phone Number"
             type="tel"
+            inputMode="numeric"
+            maxLength={10}
             placeholder="Enter phone number"
             error={errors.phone?.message}
             {...register('phone')}
+            onChange={(e) => {
+              setValue('phone', e.target.value.replace(/\D/g, ''), {
+                shouldValidate: true,
+              });
+            }}
           />
 
           <Input
-            label="Address"
+            label="Address (Optional)"
             placeholder="Enter full address"
             error={errors.address?.message}
             {...register('address')}
@@ -225,7 +231,7 @@ export function DonationPage() {
           />
 
           <Input
-            label="Purpose"
+            label="Purpose (Optional)"
             placeholder="What is this donation for?"
             error={errors.purpose?.message}
             {...register('purpose')}
