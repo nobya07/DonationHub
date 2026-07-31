@@ -7,8 +7,6 @@ import {
 import { requireAuth } from './utils/guard.js';
 
 interface DonationBody {
-  collectorId?: string;
-  collectorName?: string;
   donorName?: string;
   phone?: string;
   address?: string;
@@ -40,13 +38,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       const donations = await getAllDonations();
 
-      const ownDonations = donations.filter(
-        (d) => d.collectorId === session.collectorId
-      );
+      const sessionDonations =
+        session.role === 'Admin'
+          ? donations
+          : donations.filter(
+              (d) => d.collectorId === session.collectorId
+            );
 
-      ownDonations.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+      sessionDonations.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
-      return res.status(200).json({ donations: ownDonations });
+      return res.status(200).json({ donations: sessionDonations });
     }
 
     if (req.method !== 'POST') {
@@ -71,8 +72,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await appendDonation({
       timestamp,
       receiptNo,
-      collectorId: body.collectorId ?? session.collectorId,
-      collectorName: body.collectorName ?? session.collectorName,
+      collectorId: session.collectorId,
+      collectorName: session.collectorName,
       donorName: body.donorName!.trim(),
       phone: body.phone!.trim(),
       address: (body.address ?? '').trim(),
