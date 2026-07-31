@@ -23,6 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       collectorId: payload.collectorId,
       collectorName: payload.collectorName,
       username: payload.username,
+      role: payload.role === 'Admin' ? 'Admin' : 'Collector',
     });
   } catch (error) {
     console.error('Verify error:', error);

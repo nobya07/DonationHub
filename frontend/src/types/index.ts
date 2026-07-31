@@ -1,7 +1,10 @@
+export type UserRole = 'Admin' | 'Collector';
+
 export interface Collector {
   collectorId: string;
   username: string;
   collectorName: string;
+  role: UserRole;
 }
 
 export interface LoginCredentials {
@@ -14,12 +17,14 @@ export interface LoginResponse {
   collectorId: string;
   collectorName: string;
   username: string;
+  role: UserRole;
 }
 
 export interface VerifyResponse {
   collectorId: string;
   collectorName: string;
   username: string;
+  role: UserRole;
 }
 
 export interface ApiError {
@@ -41,4 +46,42 @@ export interface DonationPayload {
 export interface DonationResponse {
   success: boolean;
   receiptNumber: string;
+}
+
+export interface DonationRecord {
+  timestamp: string;
+  receiptNo: string;
+  collectorId: string;
+  collectorName: string;
+  donorName: string;
+  phone: string;
+  address: string;
+  amount: number;
+  paymentMode: string;
+  purpose: string;
+  remarks: string;
+}
+
+export interface AdminCollector {
+  collectorId: string;
+  username: string;
+  collectorName: string;
+  role: UserRole;
+  active: boolean;
+}
+
+export interface CollectorFormData {
+  username: string;
+  password?: string;
+  collectorName: string;
+  role: UserRole;
+  active: boolean;
+}
+
+export interface DonationFilters {
+  search?: string;
+  collectorId?: string;
+  paymentMode?: string;
+  from?: string;
+  to?: string;
 }

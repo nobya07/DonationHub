@@ -1,5 +1,23 @@
 import axios from 'axios';
-import type { DonationPayload, DonationResponse } from '../types';
+import type {
+  DonationPayload,
+  DonationResponse,
+  DonationRecord,
+} from '../types';
+
+interface RawDonation {
+  timestamp: string;
+  receiptNo: string;
+  collectorId: string;
+  collectorName: string;
+  donorName: string;
+  phone: string;
+  address: string;
+  amount: string;
+  paymentMode: string;
+  purpose: string;
+  remarks: string;
+}
 
 const api = axios.create({
   baseURL: '/api',
@@ -23,9 +41,21 @@ api.interceptors.response.use(
   },
 );
 
+function mapDonation(donation: RawDonation): DonationRecord {
+  return {
+    ...donation,
+    amount: Number(donation.amount) || 0,
+  };
+}
+
 export async function submitDonation(
   payload: DonationPayload,
 ): Promise<DonationResponse> {
   const { data } = await api.post<DonationResponse>('/donations', payload);
   return data;
+}
+
+export async function getMyDonations(): Promise<DonationRecord[]> {
+  const { data } = await api.get<{ donations: RawDonation[] }>('/donations');
+  return data.donations.map(mapDonation);
 }

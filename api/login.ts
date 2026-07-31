@@ -47,6 +47,7 @@ export default async function handler(
       collectorId: collector.collectorId,
       username: collector.username,
       collectorName: collector.collectorName,
+      role: collector.role,
     });
 
     res.setHeader("Set-Cookie", createSessionCookie(token));
@@ -55,6 +56,7 @@ export default async function handler(
       collectorId: collector.collectorId,
       username: collector.username,
       collectorName: collector.collectorName,
+      role: collector.role,
     });
   } catch (error) {
     console.error(error);

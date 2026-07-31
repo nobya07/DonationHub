@@ -1,6 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getNextReceiptNumber, appendDonation } from './utils/sheets.js';
-import { verifySessionToken, getTokenFromCookies } from './utils/session.js';
+import {
+  getNextReceiptNumber,
+  appendDonation,
+  getAllDonations,
+} from './utils/sheets.js';
+import { requireAuth } from './utils/guard.js';
 
 interface DonationBody {
   collectorId?: string;
@@ -28,16 +32,25 @@ function formatTimestamp(): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+  const session = requireAuth(req, res);
+
+  if (!session) return;
 
   try {
-    const token = getTokenFromCookies(req.headers.cookie);
-    const session = token ? verifySessionToken(token) : null;
+    if (req.method === 'GET') {
+      const donations = await getAllDonations();
 
-    if (!session) {
-      return res.status(401).json({ message: 'Not authenticated' });
+      const ownDonations = donations.filter(
+        (d) => d.collectorId === session.collectorId
+      );
+
+      ownDonations.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+      return res.status(200).json({ donations: ownDonations });
+    }
+
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
     }
 
     const body = req.body as DonationBody;

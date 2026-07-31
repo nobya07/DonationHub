@@ -5,7 +5,7 @@ import type { Collector } from '../types';
 interface AuthContextValue {
   user: Collector | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<Collector>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           collectorId: data.collectorId,
           username: data.username,
           collectorName: data.collectorName,
+          role: data.role,
         });
       })
       .catch(() => {
@@ -36,11 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (username: string, password: string) => {
     const data = await authService.login(username, password);
-    setUser({
+    const nextUser: Collector = {
       collectorId: data.collectorId,
       username: data.username,
       collectorName: data.collectorName,
-    });
+      role: data.role,
+    };
+    setUser(nextUser);
+    return nextUser;
   }, []);
 
   const logout = useCallback(async () => {

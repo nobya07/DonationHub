@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
+import type { UserRole } from '../types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
@@ -15,13 +16,17 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+function homeForRole(role: UserRole): string {
+  return role === 'Admin' ? '/admin' : '/';
+}
+
+export function Login() {
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/';
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 
   const {
     register,
@@ -31,16 +36,20 @@ export function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  if (isAuthenticated) {
-    navigate(from, { replace: true });
-    return null;
+  if (isAuthenticated && user) {
+    return <Navigate to={homeForRole(user.role)} replace />;
   }
 
   const onSubmit = async (data: LoginForm) => {
     setServerError(null);
     try {
-      await login(data.username, data.password);
-      navigate(from, { replace: true });
+      const loggedInUser = await login(data.username, data.password);
+
+      if (from && from !== '/login') {
+        navigate(from, { replace: true });
+      } else {
+        navigate(homeForRole(loggedInUser.role), { replace: true });
+      }
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Login failed');
     }
@@ -51,7 +60,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900">DonationHub</h1>
-          <p className="mt-2 text-sm text-gray-500">Sign in to start collecting</p>
+          <p className="mt-2 text-sm text-gray-500">Sign in to continue</p>
         </div>
 
         <Card padding="lg">

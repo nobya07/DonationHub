@@ -17,6 +17,7 @@ export interface SessionPayload {
   collectorId: string;
   username: string;
   collectorName: string;
+  role: 'Admin' | 'Collector';
 }
 
 export function createSessionToken(payload: SessionPayload): string {
