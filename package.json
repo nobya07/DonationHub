@@ -1,0 +1,10 @@
+{
+  "name": "donationhub",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm run build"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

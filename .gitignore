@@ -7,9 +7,12 @@ __pycache__/
 
 # Environment
 .env
+.env.local
+.env.production
 
 # Logs
 *.log
+npm-debug.log*
 
 # Build
 dist/
@@ -17,9 +20,13 @@ build/
 
 # IDE
 .vscode/
+.idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
+Thumbs.db
 
 # Database
 *.db
@@ -30,5 +37,10 @@ build/
 # Coverage
 coverage/
 
-# Misc
-*.swp
+# TypeScript
+*.tsbuildinfo
+
+credentials/
+.env.local
+.vercel
+.env*
