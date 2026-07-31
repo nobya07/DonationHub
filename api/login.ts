@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getCollector } from "./utils/sheets";
+import { getCollector } from "./utils/sheets.js";
 import {
   createSessionToken,
   createSessionCookie,
-} from "./utils/session";
+} from "./utils/session.js";
 
 export default async function handler(
   req: VercelRequest,

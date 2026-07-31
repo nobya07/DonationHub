@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getNextReceiptNumber, appendDonation } from './utils/sheets';
-import { verifySessionToken, getTokenFromCookies } from './utils/session';
+import { getNextReceiptNumber, appendDonation } from './utils/sheets.js';
+import { verifySessionToken, getTokenFromCookies } from './utils/session.js';
 
 interface DonationBody {
   collectorId?: string;
