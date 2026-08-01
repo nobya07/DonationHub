@@ -1,6 +1,6 @@
 {
   "name": "bluetooth-printer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "ESC/POS 58mm Bluetooth thermal printer plugin for DonationHub (Capacitor Android)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
       "src": "android"
     }
   },
-  "peerDependencies": {
-    "@capacitor/core": "^7.0.0"
+  "dependencies": {
+    "@capacitor/core": "^7.6.8"
   }
 }
