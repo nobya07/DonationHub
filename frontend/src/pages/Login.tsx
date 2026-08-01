@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +25,17 @@ export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const bridge = (
+      window as unknown as {
+        AndroidSecure?: { setSecure: (secure: boolean) => void };
+      }
+    ).AndroidSecure;
+    if (!bridge) return;
+    bridge.setSecure(true);
+    return () => bridge.setSecure(false);
+  }, []);
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 

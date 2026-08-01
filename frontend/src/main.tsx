@@ -13,3 +13,5 @@ createRoot(rootElement).render(
     <App />
   </StrictMode>,
 );
+
+document.getElementById('app-splash')?.remove();

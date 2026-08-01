@@ -31,15 +31,28 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      const message = error.response.data?.message || 'An unexpected error occurred';
+      const message =
+        error.response.data?.message || 'An unexpected error occurred';
       return Promise.reject(new Error(message));
     }
     if (error.request) {
-      return Promise.reject(new Error('Network error. Please check your connection.'));
+      const networkError = new Error(
+        'You are offline. Your donation will be saved on this device and uploaded automatically.'
+      );
+      (networkError as Error & { isNetworkError?: boolean }).isNetworkError =
+        true;
+      return Promise.reject(networkError);
     }
     return Promise.reject(error);
   },
 );
+
+export function isNetworkError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error as Error & { isNetworkError?: boolean }).isNetworkError === true
+  );
+}
 
 function mapDonation(donation: RawDonation): DonationRecord {
   return {

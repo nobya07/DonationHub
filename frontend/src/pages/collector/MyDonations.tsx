@@ -1,23 +1,130 @@
 import { useEffect, useMemo, useState } from 'react';
+import { jsPDF } from 'jspdf';
+import { useAuth } from '../../hooks/useAuth';
 import { getMyDonations } from '../../services/donations';
 import type { DonationRecord } from '../../types';
 import { Card } from '../../components/ui/Card';
 import { StatCard } from '../../components/StatCard';
 import { PageLoader } from '../../components/PageLoader';
-import { formatCurrency, formatDateTime, isToday } from '../../utils/format';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { downloadCsv } from '../../utils/csv';
+import {
+  formatCurrency,
+  formatDateTime,
+  isToday,
+  parseSheetTimestamp,
+} from '../../utils/format';
+
+type SearchField = 'receiptNo' | 'donorName' | 'phone' | 'date' | 'paymentMode';
+type SortBy = 'newest' | 'oldest' | 'amount';
+
+const SEARCH_FIELDS = [
+  { value: 'donorName', label: 'Donor Name' },
+  { value: 'receiptNo', label: 'Receipt Number' },
+  { value: 'phone', label: 'Phone' },
+  { value: 'date', label: 'Date' },
+  { value: 'paymentMode', label: 'Payment Mode' },
+];
+
+const PAYMENT_MODES = [
+  { value: '', label: 'All Modes' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'upi', label: 'UPI' },
+];
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
+  { value: 'amount', label: 'Amount' },
+];
+
+const EXPORT_COLUMNS = [
+  { header: 'Receipt No', width: 80 },
+  { header: 'Date', width: 95 },
+  { header: 'Donor Name', width: 80 },
+  { header: 'Phone', width: 70 },
+  { header: 'Amount', width: 50 },
+  { header: 'Mode', width: 40 },
+  { header: 'Purpose', width: 60 },
+  { header: 'Remarks', width: 40 },
+];
+
+function recordDateKey(d: DonationRecord): string {
+  const parsed = parseSheetTimestamp(d.timestamp);
+  if (!parsed) return d.timestamp.slice(0, 10);
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function recordTime(d: DonationRecord): number {
+  return parseSheetTimestamp(d.timestamp)?.getTime() ?? 0;
+}
 
 export function MyDonations() {
+  const { user } = useAuth();
   const [donations, setDonations] = useState<DonationRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const [searchField, setSearchField] = useState<SearchField>('donorName');
+  const [searchText, setSearchText] = useState('');
+  const [searchDate, setSearchDate] = useState('');
+  const [searchPaymentMode, setSearchPaymentMode] = useState('');
+  const [sortBy, setSortBy] = useState<SortBy>('newest');
 
   useEffect(() => {
+    setError(null);
     getMyDonations()
       .then(setDonations)
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load donations');
+        setError(
+          err instanceof Error
+            ? `Could not load your donations. ${err.message}`
+            : 'Could not load your donations. Please try again.',
+        );
         setDonations([]);
       });
-  }, []);
+  }, [reloadKey]);
+
+  const filtered = useMemo(() => {
+    const list = donations ?? [];
+    const query = searchText.trim().toLowerCase();
+
+    const result = list.filter((d) => {
+      if (searchField === 'paymentMode') {
+        if (searchPaymentMode && d.paymentMode.toLowerCase() !== searchPaymentMode) {
+          return false;
+        }
+        return true;
+      }
+
+      if (searchField === 'date') {
+        if (!searchDate) return true;
+        return recordDateKey(d) === searchDate;
+      }
+
+      if (!query) return true;
+
+      const haystack =
+        searchField === 'receiptNo'
+          ? d.receiptNo
+          : searchField === 'phone'
+            ? d.phone
+            : d.donorName;
+
+      return haystack.toLowerCase().includes(query);
+    });
+
+    return result.sort((a, b) => {
+      if (sortBy === 'oldest') return recordTime(a) - recordTime(b);
+      if (sortBy === 'amount') return b.amount - a.amount;
+      return recordTime(b) - recordTime(a);
+    });
+  }, [donations, searchField, searchText, searchDate, searchPaymentMode, sortBy]);
 
   const todayTotal = useMemo(
     () => (donations ?? []).filter((d) => isToday(d.timestamp)).reduce((sum, d) => sum + d.amount, 0),
@@ -29,24 +136,203 @@ export function MyDonations() {
     [donations],
   );
 
+  const resetFilters = () => {
+    setSearchField('donorName');
+    setSearchText('');
+    setSearchDate('');
+    setSearchPaymentMode('');
+    setSortBy('newest');
+  };
+
+  const handleExportCsv = () => {
+    downloadCsv(
+      `my-donations-${new Date().toISOString().slice(0, 10)}.csv`,
+      ['Receipt No', 'Date', 'Donor Name', 'Phone', 'Amount', 'Payment Mode', 'Purpose', 'Remarks'],
+      filtered.map((d) => [
+        d.receiptNo,
+        d.timestamp,
+        d.donorName,
+        d.phone,
+        d.amount,
+        d.paymentMode,
+        d.purpose,
+        d.remarks,
+      ]),
+    );
+  };
+
+  const handleExportPdf = () => {
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 40;
+    const fontSize = 8.5;
+    const lineHeight = fontSize + 3;
+
+    let y = 52;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('DonationHub - My Donations', margin, y);
+    y += 20;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(110);
+    doc.text(`Collector: ${user?.collectorName ?? ''}`, margin, y);
+    doc.text(
+      `Exported: ${new Date().toLocaleString()} (${filtered.length} donations)`,
+      pageWidth - margin,
+      y,
+      { align: 'right' },
+    );
+    y += 26;
+
+    doc.setTextColor(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(fontSize);
+
+    const drawRow = (cells: string[], bold?: boolean) => {
+      const wrapped = cells.map((cell, i) =>
+        doc.splitTextToSize(String(cell), EXPORT_COLUMNS[i]!.width - 8),
+      );
+      const lines = Math.max(...wrapped.map((w) => w.length));
+      const height = Math.max(18, lines * lineHeight + 6);
+
+      if (y + height > 780) {
+        doc.addPage();
+        y = 50;
+        doc.setFont('helvetica', 'bold');
+      }
+
+      let x = margin;
+      wrapped.forEach((textLines, i) => {
+        if (bold) doc.setFont('helvetica', 'bold');
+        else doc.setFont('helvetica', 'normal');
+        doc.text(textLines, x + 4, y + 13);
+        x += EXPORT_COLUMNS[i]!.width;
+      });
+      y += height;
+    };
+
+    drawRow(
+      EXPORT_COLUMNS.map((c) => c.header),
+      true,
+    );
+    doc.setDrawColor(200);
+    doc.line(margin, y - 8, pageWidth - margin, y - 8);
+
+    filtered.forEach((d) => {
+      drawRow([
+        d.receiptNo,
+        formatDateTime(d.timestamp),
+        d.donorName,
+        d.phone,
+        formatCurrency(d.amount),
+        d.paymentMode,
+        d.purpose || '-',
+        d.remarks || '-',
+      ]);
+    });
+
+    y += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.text(
+      `Total (${filtered.length} donations): ${formatCurrency(
+        filtered.reduce((sum, d) => sum + d.amount, 0),
+      )}`,
+      pageWidth - margin,
+      y,
+      { align: 'right' },
+    );
+
+    doc.save(`my-donations-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
   if (!donations) {
     return <PageLoader />;
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">My Donations</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Donations collected by you.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">My Donations</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            Donations collected by you. {filtered.length} of {donations.length} shown.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={handleExportCsv} disabled={filtered.length === 0}>
+            Export CSV
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleExportPdf} disabled={filtered.length === 0}>
+            Export PDF
+          </Button>
+        </div>
       </div>
 
       {error && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          {error}
+          <div className="flex items-center justify-between gap-3">
+            <p>{error}</p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
+              onClick={() => setReloadKey((k) => k + 1)}
+            >
+              Retry
+            </Button>
+          </div>
         </div>
       )}
+
+      <Card padding="md">
+        <div className="grid gap-4 md:grid-cols-4">
+          <Select
+            label="Search by"
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value as SearchField)}
+            options={SEARCH_FIELDS}
+          />
+          {searchField === 'paymentMode' ? (
+            <Select
+              label="Payment Mode"
+              value={searchPaymentMode}
+              onChange={(e) => setSearchPaymentMode(e.target.value)}
+              options={PAYMENT_MODES}
+            />
+          ) : searchField === 'date' ? (
+            <Input
+              label="Date"
+              type="date"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            />
+          ) : (
+            <Input
+              label={SEARCH_FIELDS.find((f) => f.value === searchField)?.label ?? 'Search'}
+              type="text"
+              placeholder={
+                searchField === 'phone' ? 'e.g. 98765 43210' : 'Type to search…'
+              }
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          )}
+          <Select
+            label="Sort by"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortBy)}
+            options={SORT_OPTIONS}
+          />
+          <div className="flex items-end">
+            <Button variant="ghost" size="sm" className="w-full" onClick={resetFilters}>
+              Clear
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Today's Collections" value={formatCurrency(todayTotal)} accent="primary" />
@@ -58,7 +344,7 @@ export function MyDonations() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-gray-200 dark:border-gray-700 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <th className="px-3 py-2 font-medium">Receipt Number</th>
                 <th className="px-3 py-2 font-medium">Date</th>
                 <th className="px-3 py-2 font-medium">Donor Name</th>
@@ -70,23 +356,25 @@ export function MyDonations() {
               </tr>
             </thead>
             <tbody>
-              {donations.length === 0 && (
+              {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-gray-500">
-                    No donations found.
+                  <td colSpan={8} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    {donations.length === 0
+                      ? 'No donations found.'
+                      : 'No donations match your search.'}
                   </td>
                 </tr>
               )}
-              {donations.map((d) => (
-                <tr key={d.receiptNo} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                  <td className="px-3 py-2.5 font-mono text-xs font-medium text-gray-900">{d.receiptNo}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{formatDateTime(d.timestamp)}</td>
-                  <td className="px-3 py-2.5 font-medium text-gray-900">{d.donorName}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{d.phone}</td>
-                  <td className="px-3 py-2.5 font-semibold text-gray-900">{formatCurrency(d.amount)}</td>
-                  <td className="px-3 py-2.5 capitalize text-gray-600">{d.paymentMode}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{d.purpose || '-'}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{d.remarks || '-'}</td>
+              {filtered.map((d) => (
+                <tr key={d.receiptNo} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:bg-gray-800">
+                  <td className="px-3 py-2.5 font-mono text-xs font-medium text-gray-900 dark:text-white">{d.receiptNo}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{formatDateTime(d.timestamp)}</td>
+                  <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{d.donorName}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.phone}</td>
+                  <td className="px-3 py-2.5 font-semibold text-gray-900 dark:text-white">{formatCurrency(d.amount)}</td>
+                  <td className="px-3 py-2.5 capitalize text-gray-600 dark:text-gray-300">{d.paymentMode}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.purpose || '-'}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.remarks || '-'}</td>
                 </tr>
               ))}
             </tbody>

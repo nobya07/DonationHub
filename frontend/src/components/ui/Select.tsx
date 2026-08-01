@@ -20,17 +20,17 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <div className="space-y-1.5">
         <label
           htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           {label}
         </label>
         <select
           ref={ref}
           id={selectId}
-          className={`block w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-900 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
+          className={`block w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-900 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 dark:text-gray-100 ${
             error
-              ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-              : 'border-gray-300 focus:border-primary-400 focus:ring-primary-200'
+              ? 'border-red-300 focus:border-red-400 focus:ring-red-200 dark:border-red-700'
+              : 'border-gray-300 focus:border-primary-400 focus:ring-primary-200 dark:border-gray-600'
           } ${className}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${selectId}-error` : undefined}

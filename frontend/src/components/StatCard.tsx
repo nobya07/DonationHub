@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Card } from './ui/Card';
 
 interface StatCardProps {
@@ -17,7 +17,7 @@ const accentStyles: Record<string, string> = {
   rose: 'bg-rose-100 text-rose-600',
 };
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   label,
   value,
   icon,
@@ -36,10 +36,10 @@ export function StatCard({
           </div>
         )}
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-gray-900">{label}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
         </div>
       </div>
     </Card>
   );
-}
+});

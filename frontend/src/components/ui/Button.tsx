@@ -14,9 +14,9 @@ const variantStyles: Record<Variant, string> = {
   primary:
     'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500 disabled:bg-primary-400',
   secondary:
-    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus-visible:ring-primary-500 disabled:opacity-50',
+    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus-visible:ring-primary-500 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700',
   ghost:
-    'text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus-visible:ring-gray-500',
+    'text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800',
 };
 
 const sizeStyles: Record<Size, string> = {

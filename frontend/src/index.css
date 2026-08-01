@@ -13,6 +13,33 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html {
+    overscroll-behavior: none;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  input,
+  textarea,
+  select {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   input:-webkit-autofill,
