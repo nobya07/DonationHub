@@ -16,7 +16,7 @@
     "@capacitor/preferences": "^7.0.4",
     "@hookform/resolvers": "^4.1.0",
     "axios": "^1.7.9",
-    "bluetooth-printer": "file:../capacitor-plugins/bluetooth-printer",
+    "bluetooth-printer": "0.0.1",
     "jspdf": "^4.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

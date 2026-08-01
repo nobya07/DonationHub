@@ -1,14 +1,19 @@
 {
   "name": "donationhub",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "capacitor-plugins/bluetooth-printer"
+  ],
   "scripts": {
-    "build": "cd frontend && npm run build"
+    "build": "npm run build -w frontend",
+    "build:plugin": "npm run build -w bluetooth-printer"
   },
   "dependencies": {
     "@capacitor/android": "^7.6.8",
     "@capacitor/core": "^7.6.8",
     "@capacitor/preferences": "^7.0.4",
-    "bluetooth-printer": "file:capacitor-plugins/bluetooth-printer",
+    "bluetooth-printer": "0.0.1",
     "dotenv": "^17.4.2"
   },
   "devDependencies": {
