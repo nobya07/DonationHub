@@ -5,18 +5,25 @@ const PROBE_TIMEOUT_MS = 5_000;
 
 async function probeOnline(): Promise<boolean> {
   if (!navigator.onLine) return false;
+
   try {
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+
+    const timer = window.setTimeout(() => {
+      controller.abort();
+    }, PROBE_TIMEOUT_MS);
+
     const response = await fetch('/api/verify', {
-      method: 'HEAD',
+      method: 'GET',
       cache: 'no-store',
+      credentials: 'include',
       signal: controller.signal,
     });
+
     window.clearTimeout(timer);
-    // Any HTTP response means the server is reachable.
-    void response;
-    return true;
+
+    // Any successful HTTP response means the backend is reachable.
+    return response.ok;
   } catch {
     return false;
   }
@@ -35,20 +42,27 @@ export function useNetworkStatus(): boolean {
 
     const check = async () => {
       const result = await probeOnline();
-      if (!cancelled) setOnline(result);
+      if (!cancelled) {
+        setOnline(result);
+      }
     };
 
     const handleOnline = () => {
-      setOnline(true);
       void check();
     };
-    const handleOffline = () => setOnline(false);
+
+    const handleOffline = () => {
+      setOnline(false);
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
     void check();
 
-    const id = window.setInterval(() => void check(), PROBE_INTERVAL_MS);
+    const id = window.setInterval(() => {
+      void check();
+    }, PROBE_INTERVAL_MS);
 
     return () => {
       cancelled = true;
