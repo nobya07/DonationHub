@@ -7,6 +7,7 @@
   "dependencies": {
     "@capacitor/android": "^7.6.8",
     "@capacitor/core": "^7.6.8",
+    "@capacitor/preferences": "^7.0.4",
     "bluetooth-printer": "file:capacitor-plugins/bluetooth-printer",
     "dotenv": "^17.4.2"
   },

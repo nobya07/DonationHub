@@ -1,16 +1,5 @@
 import { registerPlugin, type PluginListenerHandle } from '@capacitor/core';
 
-export interface ReceiptData {
-  receiptNo: string;
-  donorName: string;
-  phone: string;
-  amount: string;
-  paymentMode: string;
-  purpose?: string;
-  collectorName: string;
-  date: string;
-}
-
 export interface PrinterDevice {
   name: string;
   address: string;
@@ -21,8 +10,11 @@ export type PrinterState = 'idle' | 'connected' | 'printing' | 'offline' | 'erro
 export interface PrinterStatus {
   connected: boolean;
   deviceName: string | null;
+  address: string | null;
   state: PrinterState;
   message: string;
+  pending?: number;
+  lastPrintTime?: number | null;
 }
 
 export interface PrintResult {
@@ -30,38 +22,60 @@ export interface PrintResult {
   message: string;
 }
 
+export interface ReceiptData {
+  templeName: string;
+  receiptNo: string;
+  date: string;
+  collectorName: string;
+  donorName: string;
+  phone: string;
+  address: string;
+  amount: string;
+  paymentMode: string;
+  purpose?: string;
+  remarks?: string;
+  thankYou?: string;
+  paperWidth?: 58 | 80;
+}
+
 export interface BluetoothPrinterPlugin {
+  getPairedPrinters(): Promise<{ devices: PrinterDevice[] }>;
+  connect(options: { macAddress: string }): Promise<PrintResult>;
+  disconnect(): Promise<PrintResult>;
   printReceipt(options: { receipt: ReceiptData }): Promise<PrintResult>;
   testPrint(): Promise<PrintResult>;
-  listDevices(): Promise<{ devices: PrinterDevice[] }>;
-  getStatus(): Promise<PrinterStatus>;
-  selectDevice(options: { address: string }): Promise<PrintResult>;
+  getConnectedPrinter(): Promise<PrinterStatus>;
+  clearSavedPrinter(): Promise<PrintResult>;
+  isBluetoothEnabled(): Promise<{ enabled: boolean }>;
+  openBluetoothSettings(): Promise<void>;
   addListener(
     eventName: 'statusChange',
     listener: (status: PrinterStatus) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
 }
 
+const ANDROID_ONLY = 'Bluetooth printing is only available in the Android app';
+
 const webImplementation: BluetoothPrinterPlugin = {
-  printReceipt: async () => ({
-    success: false,
-    message: 'Bluetooth printing is only available in the Android app',
-  }),
-  testPrint: async () => ({
-    success: false,
-    message: 'Bluetooth printing is only available in the Android app',
-  }),
-  listDevices: async () => ({ devices: [] }),
-  getStatus: async () => ({
+  getPairedPrinters: async () => ({ devices: [] }),
+  connect: async () => ({ success: false, message: ANDROID_ONLY }),
+  disconnect: async () => ({ success: true, message: 'Nothing to disconnect on web' }),
+  printReceipt: async () => ({ success: false, message: ANDROID_ONLY }),
+  testPrint: async () => ({ success: false, message: ANDROID_ONLY }),
+  getConnectedPrinter: async () => ({
     connected: false,
     deviceName: null,
-    state: 'error',
-    message: 'Bluetooth printing is only available in the Android app',
+    address: null,
+    state: 'idle',
+    message: ANDROID_ONLY,
+    pending: 0,
+    lastPrintTime: null,
   }),
-  selectDevice: async () => ({
-    success: false,
-    message: 'Bluetooth printing is only available in the Android app',
-  }),
+  clearSavedPrinter: async () => ({ success: true, message: 'Nothing to clear on web' }),
+  isBluetoothEnabled: async () => ({ enabled: true }),
+  openBluetoothSettings: async () => {
+    // no-op on web
+  },
   addListener: () => {
     const handle: PluginListenerHandle = {
       remove: async () => {

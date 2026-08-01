@@ -1,6 +1,9 @@
 package com.donationhub.app.bluetoothprinter
 
+import android.content.Intent
+import android.provider.Settings
 import com.getcapacitor.JSObject
+import com.getcapacitor.PermissionState
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
@@ -21,42 +24,42 @@ class BluetoothPrinterPlugin : Plugin() {
 
     private lateinit var service: BluetoothPrinterService
 
-    private var pendingPrintCall: PluginCall? = null
-    private var pendingReceipt: JSObject? = null
+    private var pendingPermissionCall: PluginCall? = null
 
     override fun load() {
         service = BluetoothPrinterService(context, this)
     }
 
     @PluginMethod
-    fun getStatus(call: PluginCall) {
-        call.resolve(service.getStatus())
-    }
-
-    @PluginMethod
-    fun listDevices(call: PluginCall) {
+    fun getPairedPrinters(call: PluginCall) {
         if (!service.isBluetoothAvailable()) {
-            call.reject("Bluetooth is not available or is turned off")
+            call.reject("Bluetooth is disabled. Turn on Bluetooth to see paired printers.")
             return
         }
-        call.resolve(service.listDevices())
+        withPermission(call, ::getPairedPrinters)
     }
 
     @PluginMethod
-    fun selectDevice(call: PluginCall) {
-        val address = call.getString("address")
-        if (address.isNullOrBlank()) {
-            call.reject("Device address is required")
+    fun connect(call: PluginCall) {
+        val macAddress = call.getString("macAddress")
+        if (macAddress.isNullOrBlank()) {
+            call.reject("Printer MAC address is required")
             return
         }
-        call.resolve(service.selectDevice(address))
+        withPermission(call, ::connect)
     }
 
     @PluginMethod
-    fun testPrint(call: PluginCall) {
-        pendingPrintCall = call
-        pendingReceipt = null
-        ensurePrintPermission()
+    fun disconnect(call: PluginCall) {
+        service.disconnect(
+            onSuccess = { message ->
+                call.resolve(JSObject().apply {
+                    put("success", true)
+                    put("message", message)
+                })
+            },
+            onFailure = { message -> call.reject(message) }
+        )
     }
 
     @PluginMethod
@@ -66,47 +69,77 @@ class BluetoothPrinterPlugin : Plugin() {
             call.reject("Receipt data is required")
             return
         }
-        pendingPrintCall = call
-        pendingReceipt = receipt
-        ensurePrintPermission()
+        withPermission(call, ::printReceipt)
     }
 
-    private fun ensurePrintPermission() {
-        if (!hasRequiredPermissions()) {
-            requestAllPermissions(PRINT_PERMISSION_CALLBACK)
-        } else {
-            startPrint()
-        }
+    @PluginMethod
+    fun testPrint(call: PluginCall) {
+        withPermission(call, ::testPrint)
     }
 
-    @PermissionCallback
-    private fun printPermissionCallback(call: PluginCall) {
-        if (call.hasPermission("bluetoothConnect")) {
-            startPrint()
-        } else {
-            call.reject("Bluetooth permission was denied")
-        }
+    @PluginMethod
+    fun getConnectedPrinter(call: PluginCall) {
+        call.resolve(service.getConnectedPrinter())
     }
 
-    private fun startPrint() {
-        val call = pendingPrintCall ?: return
-
-        service.print(
-            pendingReceipt,
+    @PluginMethod
+    fun clearSavedPrinter(call: PluginCall) {
+        service.clearSavedPrinter(
             onSuccess = { message ->
                 call.resolve(JSObject().apply {
                     put("success", true)
                     put("message", message)
                 })
-                pendingPrintCall = null
-                pendingReceipt = null
             },
-            onFailure = { message ->
-                call.reject(message)
-                pendingPrintCall = null
-                pendingReceipt = null
-            }
+            onFailure = { message -> call.reject(message) }
         )
+    }
+
+    @PluginMethod
+    fun isBluetoothEnabled(call: PluginCall) {
+        call.resolve(JSObject().apply {
+            put("enabled", service.isBluetoothAvailable())
+        })
+    }
+
+    @PluginMethod
+    fun openBluetoothSettings(call: PluginCall) {
+        try {
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            getContext().startActivity(intent)
+            call.resolve()
+        } catch (e: Exception) {
+            call.reject("Could not open Bluetooth settings", e)
+        }
+    }
+
+    private fun withPermission(call: PluginCall, action: (PluginCall) -> Unit) {
+        if (!hasRequiredPermissions()) {
+            pendingPermissionCall = call
+            requestAllPermissions(call, PERMISSION_CALLBACK)
+        } else {
+            action(call)
+        }
+    }
+
+    @PermissionCallback
+    private fun permissionCallback(call: PluginCall) {
+        val original = pendingPermissionCall
+        pendingPermissionCall = null
+
+        if (getPermissionState("bluetoothConnect") != PermissionState.GRANTED) {
+            original?.reject("Bluetooth permission was denied")
+            return
+        }
+
+        when (original?.methodName) {
+            "getPairedPrinters" -> getPairedPrinters(original)
+            "connect" -> connect(original)
+            "printReceipt" -> printReceipt(original)
+            "testPrint" -> testPrint(original)
+            else -> original?.reject("Unknown operation")
+        }
     }
 
     fun notifyStatusChange(status: JSObject) {
@@ -114,6 +147,6 @@ class BluetoothPrinterPlugin : Plugin() {
     }
 
     companion object {
-        private const val PRINT_PERMISSION_CALLBACK = "printPermissionCallback"
+        private const val PERMISSION_CALLBACK = "permissionCallback"
     }
 }

@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
 import {
   BluetoothPrinter,
   type PrintResult,
@@ -52,8 +52,13 @@ export function testPrint(): Promise<PrintResult> {
  */
 export async function ensurePrinterConnected(): Promise<PrinterStatus> {
   const status = await getPrinterStatus();
-  if (!status.address || status.connected) return status;
+
+  if (!status.address || status.connected) {
+    return status;
+  }
+
   await connectPrinter(status.address);
+
   return getPrinterStatus();
 }
 
@@ -63,6 +68,7 @@ export async function ensurePrinterConnected(): Promise<PrinterStatus> {
  */
 export function initPrinterService(): void {
   if (!isNativeApp()) return;
+
   void ensurePrinterConnected().catch(() => {
     // Printer is unavailable; it will be retried on demand before each print.
   });
@@ -81,7 +87,9 @@ export interface PrinterReceiptInput {
   date: string;
 }
 
-export function printReceipt(input: PrinterReceiptInput): Promise<PrintResult> {
+export function printReceipt(
+  input: PrinterReceiptInput,
+): Promise<PrintResult> {
   const receipt: ReceiptData = {
     templeName: TEMPLE_NAME,
     receiptNo: input.receiptNumber,
@@ -96,6 +104,7 @@ export function printReceipt(input: PrinterReceiptInput): Promise<PrintResult> {
     remarks: input.remarks,
     paperWidth: 58,
   };
+
   return BluetoothPrinter.printReceipt({ receipt });
 }
 
@@ -107,9 +116,10 @@ export function subscribeToPrinterStatus(
   listener: (status: PrinterStatus) => void,
 ): () => void {
   const handle = BluetoothPrinter.addListener('statusChange', listener);
+
   return () => {
     void handle
-      .then((h) => h.remove())
+      .then((h: PluginListenerHandle) => h.remove())
       .catch(() => {
         // listener already removed
       });
