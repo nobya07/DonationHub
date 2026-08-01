@@ -5,12 +5,32 @@ let sheetsInstance: sheets_v4.Sheets | null = null;
 function getSheets(): sheets_v4.Sheets {
   if (sheetsInstance) return sheetsInstance;
 
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+ const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-  if (!clientEmail || !privateKey) {
-    throw new Error('Google service account credentials not configured');
-  }
+console.log('\n========== ENV DEBUG ==========');
+console.log('GOOGLE_PROJECT_ID:', process.env.GOOGLE_PROJECT_ID);
+console.log('GOOGLE_CLIENT_EMAIL:', process.env.GOOGLE_CLIENT_EMAIL);
+console.log(
+  'GOOGLE_PRIVATE_KEY exists:',
+  !!process.env.GOOGLE_PRIVATE_KEY
+);
+console.log(
+  'GOOGLE_PRIVATE_KEY length:',
+  process.env.GOOGLE_PRIVATE_KEY?.length
+);
+console.log(
+  'GOOGLE_SPREADSHEET_ID:',
+  process.env.GOOGLE_SPREADSHEET_ID
+);
+console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('VERCEL_ENV:', process.env.VERCEL_ENV);
+console.log('===============================\n');
+
+if (!clientEmail || !privateKey) {
+  throw new Error('Google service account credentials not configured');
+}
 
   const auth = new google.auth.JWT({
     email: clientEmail,
@@ -444,4 +464,118 @@ export async function appendDonation(
       ]],
     },
   });
+}
+
+const WHATSAPP_SHEET_NAME = 'WhatsAppMessages';
+const WHATSAPP_SHEET_RANGE = 'WhatsAppMessages!A:E';
+
+function currentTimestamp(): string {
+  return new Date().toISOString();
+}
+
+async function ensureWhatsAppSheet(): Promise<void> {
+  const sheets = getSheets();
+  const spreadsheetId = getSpreadsheetId();
+
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+
+  const exists = (meta.data.sheets ?? []).some(
+    (sheet) => sheet.properties?.title === WHATSAPP_SHEET_NAME
+  );
+
+  if (exists) return;
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: {
+      requests: [
+        {
+          addSheet: {
+            properties: { title: WHATSAPP_SHEET_NAME },
+          },
+        },
+      ],
+    },
+  });
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: WHATSAPP_SHEET_RANGE,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: {
+      values: [['messageId', 'receiptNo', 'to', 'status', 'updatedAt']],
+    },
+  });
+}
+
+export async function recordWhatsAppMessage(
+  messageId: string,
+  receiptNo: string,
+  to: string
+): Promise<void> {
+  const sheets = getSheets();
+
+  await ensureWhatsAppSheet();
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: getSpreadsheetId(),
+    range: WHATSAPP_SHEET_RANGE,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: {
+      values: [[messageId, receiptNo, to, 'sent', currentTimestamp()]],
+    },
+  });
+}
+
+export async function updateWhatsAppMessageStatus(
+  messageId: string,
+  status: string
+): Promise<void> {
+  const sheets = getSheets();
+
+  await ensureWhatsAppSheet();
+
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: getSpreadsheetId(),
+    range: WHATSAPP_SHEET_RANGE,
+  });
+
+  const rows = response.data.values ?? [];
+
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i]?.[0] ?? '').trim() === messageId) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: getSpreadsheetId(),
+        range: `WhatsAppMessages!D${i + 1}:E${i + 1}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: {
+          values: [[status, currentTimestamp()]],
+        },
+      });
+      return;
+    }
+  }
+}
+
+export async function getWhatsAppMessageStatus(
+  messageId: string
+): Promise<string | null> {
+  const sheets = getSheets();
+
+  await ensureWhatsAppSheet();
+
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: getSpreadsheetId(),
+    range: WHATSAPP_SHEET_RANGE,
+  });
+
+  const rows = response.data.values ?? [];
+
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i]?.[0] ?? '').trim() === messageId) {
+      return rows[i]?.[3]?.trim() ?? null;
+    }
+  }
+
+  return null;
 }

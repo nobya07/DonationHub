@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../../hooks/useAuth';
 import { submitDonation } from '../../services/donations';
+import { sendReceipt, getStatus } from '../../services/whatsapp';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
@@ -34,6 +35,28 @@ interface SuccessState {
   donorName: string;
   amount: number;
   collectorName: string;
+  phone: string;
+  paymentMode: string;
+  purpose: string;
+  date: string;
+}
+
+interface WhatsAppState {
+  phase: 'idle' | 'sending' | 'sent' | 'failed';
+  messageId?: string;
+  delivery?: string;
+  error?: string;
+}
+
+const DELIVERY_LABELS: Record<string, string> = {
+  sent: 'Sent',
+  delivered: 'Delivered',
+  read: 'Read',
+  failed: 'Failed',
+};
+
+function deliveryLabel(status: string): string {
+  return DELIVERY_LABELS[status] ?? status;
 }
 
 export function Donation() {
@@ -42,6 +65,89 @@ export function Donation() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const submittedRef = useRef(false);
+  const [whatsapp, setWhatsapp] = useState<WhatsAppState>({ phase: 'idle' });
+  const whatsappPollRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (whatsappPollRef.current !== null) {
+        window.clearInterval(whatsappPollRef.current);
+      }
+    };
+  }, []);
+
+  const pollDeliveryStatus = (messageId: string) => {
+    let attempts = 0;
+
+    if (whatsappPollRef.current !== null) {
+      window.clearInterval(whatsappPollRef.current);
+    }
+
+    whatsappPollRef.current = window.setInterval(async () => {
+      attempts += 1;
+
+      try {
+        const delivery = await getStatus(messageId);
+
+        setWhatsapp((prev) =>
+          prev.phase === 'sent' ? { ...prev, delivery } : prev
+        );
+
+        const terminal =
+          delivery === 'delivered' ||
+          delivery === 'read' ||
+          delivery === 'failed' ||
+          attempts >= 15;
+
+        if (terminal && whatsappPollRef.current !== null) {
+          window.clearInterval(whatsappPollRef.current);
+        }
+      } catch {
+        if (attempts >= 15 && whatsappPollRef.current !== null) {
+          window.clearInterval(whatsappPollRef.current);
+        }
+      }
+    }, 4000);
+  };
+
+  const sendWhatsApp = async (success: SuccessState) => {
+    setWhatsapp({ phase: 'sending' });
+
+    try {
+      const result = await sendReceipt({
+        receiptNo: success.receiptNumber,
+        donorName: success.donorName,
+        phone: success.phone,
+        amount: success.amount.toFixed(2),
+        paymentMode: success.paymentMode,
+        purpose: success.purpose,
+        collectorName: success.collectorName,
+        date: success.date,
+      });
+
+      setWhatsapp({
+        phase: 'sent',
+        messageId: result.messageId,
+        delivery: result.status,
+      });
+      pollDeliveryStatus(result.messageId);
+    } catch (err) {
+      setWhatsapp({
+        phase: 'failed',
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Failed to send WhatsApp receipt',
+      });
+    }
+  };
+
+  const resetWhatsApp = () => {
+    if (whatsappPollRef.current !== null) {
+      window.clearInterval(whatsappPollRef.current);
+    }
+    setWhatsapp({ phase: 'idle' });
+  };
 
   const {
     register,
@@ -95,6 +201,41 @@ export function Donation() {
                 <span className="text-gray-500">Amount</span>
                 <span className="font-semibold text-gray-900">${Number(success.amount).toFixed(2)}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Phone</span>
+                <span className="text-gray-900">{success.phone}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Payment Mode</span>
+                <span className="text-gray-900">{success.paymentMode}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-full"
+                disabled={whatsapp.phase === 'sending'}
+                onClick={() => sendWhatsApp(success)}
+              >
+                {whatsapp.phase === 'sending'
+                  ? 'Sending...'
+                  : 'Send WhatsApp Receipt'}
+              </Button>
+
+              {whatsapp.phase === 'sent' && (
+                <p className="text-sm text-green-600">
+                  WhatsApp: {deliveryLabel(whatsapp.delivery ?? 'sent')}
+                </p>
+              )}
+
+              {whatsapp.phase === 'failed' && (
+                <p className="text-sm text-red-600">
+                  WhatsApp failed: {whatsapp.error}. Your donation is already
+                  saved.
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3">
@@ -106,6 +247,7 @@ export function Donation() {
                   setSuccess(null);
                   setServerError(null);
                   submittedRef.current = false;
+                  resetWhatsApp();
                   reset();
                 }}
               >
@@ -148,6 +290,10 @@ export function Donation() {
         donorName: data.donorName,
         amount: data.amount,
         collectorName: user!.collectorName,
+        phone: data.phone,
+        paymentMode: data.paymentMode,
+        purpose: data.purpose ?? '',
+        date: new Date().toLocaleString(),
       });
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Failed to save donation');

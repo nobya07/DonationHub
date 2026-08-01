@@ -5,6 +5,13 @@
     "build": "cd frontend && npm run build"
   },
   "dependencies": {
+    "@capacitor/android": "^7.6.8",
+    "@capacitor/core": "^7.6.8",
+    "bluetooth-printer": "file:capacitor-plugins/bluetooth-printer",
     "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.8",
+    "typescript": "^5.7.3"
   }
 }
