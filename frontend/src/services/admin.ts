@@ -58,17 +58,23 @@ export async function getDonations(filters: DonationFilters = {}): Promise<Donat
   if (filters.from) params.from = filters.from;
   if (filters.to) params.to = filters.to;
 
-  const { data } = await api.get<{ donations: RawDonation[] }>('/donations', { params });
+  const { data } = await api.get<{ donations: RawDonation[] }>('', {
+    params: { action: 'donations', ...params },
+  });
   return data.donations.map(mapDonation);
 }
 
 export async function getCollectors(): Promise<AdminCollector[]> {
-  const { data } = await api.get<{ collectors: AdminCollector[] }>('/collectors');
+  const { data } = await api.get<{ collectors: AdminCollector[] }>('', {
+    params: { action: 'collectors' },
+  });
   return data.collectors;
 }
 
 export async function createCollector(payload: CollectorFormData): Promise<AdminCollector> {
-  const { data } = await api.post<AdminCollector>('/collectors', payload);
+  const { data } = await api.post<AdminCollector>('', payload, {
+    params: { action: 'collectors' },
+  });
   return data;
 }
 
@@ -76,17 +82,23 @@ export async function updateCollector(
   collectorId: string,
   payload: Partial<CollectorFormData>,
 ): Promise<AdminCollector> {
-  const { data } = await api.patch<AdminCollector>(`/collectors/${collectorId}`, payload);
+  const { data } = await api.patch<AdminCollector>('', payload, {
+    params: { action: 'collector', id: collectorId },
+  });
   return data;
 }
 
 export async function deleteCollector(collectorId: string): Promise<void> {
-  await api.delete(`/collectors/${collectorId}`);
+  await api.delete('', {
+    params: { action: 'collector', id: collectorId },
+  });
 }
 
 export async function resetCollectorPassword(
   collectorId: string,
   newPassword: string,
 ): Promise<void> {
-  await api.post(`/collectors/${collectorId}/reset-password`, { newPassword });
+  await api.post('', { newPassword }, {
+    params: { action: 'reset-password', id: collectorId },
+  });
 }

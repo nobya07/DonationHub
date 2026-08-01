@@ -51,16 +51,15 @@ api.interceptors.response.use(
 export async function sendReceipt(
   payload: WhatsAppReceiptPayload
 ): Promise<WhatsAppSendResponse> {
-  const { data } = await api.post<WhatsAppSendResponse>(
-    '/send-receipt',
-    payload
-  );
+  const { data } = await api.post<WhatsAppSendResponse>('', payload, {
+    params: { action: 'send-receipt' },
+  });
   return data;
 }
 
 export async function getStatus(messageId: string): Promise<string> {
-  const { data } = await api.get<WhatsAppStatusResponse>('/status', {
-    params: { messageId },
+  const { data } = await api.get<WhatsAppStatusResponse>('', {
+    params: { action: 'status', messageId },
   });
   return data.status;
 }
