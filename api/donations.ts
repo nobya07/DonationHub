@@ -5,6 +5,7 @@ import {
   getAllDonations,
 } from './utils/sheets.js';
 import { requireAuth } from './utils/guard.js';
+import { formatISTTimestamp } from './utils/time.js';
 
 interface DonationBody {
   donorName?: string;
@@ -17,17 +18,6 @@ interface DonationBody {
 }
 
 const REQUIRED_FIELDS = ['donorName', 'phone', 'amount', 'paymentMode'] as const;
-
-function formatTimestamp(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const session = requireAuth(req, res);
@@ -67,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const receiptNo = await getNextReceiptNumber();
-    const timestamp = formatTimestamp();
+    const timestamp = formatISTTimestamp();
 
     await appendDonation({
       timestamp,

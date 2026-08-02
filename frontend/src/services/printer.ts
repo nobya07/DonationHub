@@ -6,6 +6,7 @@ import {
   type PrinterStatus,
   type ReceiptData,
 } from 'bluetooth-printer';
+import { formatCurrency } from '../utils/format';
 
 export type { PrintResult, PrinterDevice, PrinterStatus } from 'bluetooth-printer';
 
@@ -98,7 +99,7 @@ export function printReceipt(
     donorName: input.donorName,
     phone: input.phone,
     address: input.address,
-    amount: input.amount.toFixed(2),
+    amount: formatCurrency(input.amount),
     paymentMode: input.paymentMode.toUpperCase(),
     purpose: input.purpose,
     remarks: input.remarks,

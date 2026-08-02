@@ -7,7 +7,7 @@ import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/StatCard';
 import { PageLoader } from '../../components/PageLoader';
-import { formatCurrency, formatDateTime, isWithinRange } from '../../utils/format';
+import { formatCurrency, formatDateTime, isWithinRange, todayKey } from '../../utils/format';
 import { downloadCsv } from '../../utils/csv';
 
 const PAYMENT_MODES = [
@@ -82,7 +82,7 @@ export function Donations() {
 
   const handleExport = () => {
     downloadCsv(
-      `donations-${new Date().toISOString().slice(0, 10)}.csv`,
+      `donations-${todayKey()}.csv`,
       ['Receipt No', 'Date', 'Collector ID', 'Collector', 'Donor', 'Phone', 'Address', 'Amount', 'Payment Mode', 'Purpose', 'Remarks'],
       filtered.map((d) => [
         d.receiptNo,

@@ -17,7 +17,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { StatCard } from '../../components/StatCard';
 import { PageLoader } from '../../components/PageLoader';
-import { formatCurrency, isToday, isWithinRange } from '../../utils/format';
+import { formatCurrency, isToday, isWithinRange, currentISTHour, daysAgoKey } from '../../utils/format';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
 const REFRESH_INTERVAL_MS = 60_000;
@@ -162,7 +162,7 @@ export function Dashboard() {
   }, []);
 
   const greeting = useMemo(() => {
-    const hour = new Date().getHours();
+    const hour = currentISTHour();
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
     return 'Good Evening';
@@ -181,11 +181,7 @@ export function Dashboard() {
   );
 
   const weekTotal = useMemo(() => {
-    const fromKey = new Date(
-      Date.now() - (WEEK_DAYS - 1) * 86_400_000,
-    )
-      .toISOString()
-      .slice(0, 10);
+    const fromKey = daysAgoKey(WEEK_DAYS - 1);
     return (donations ?? [])
       .filter((d) => isWithinRange(d.timestamp, fromKey))
       .reduce((sum, d) => sum + d.amount, 0);

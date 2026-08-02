@@ -13,8 +13,11 @@ import { downloadCsv } from '../../utils/csv';
 import {
   formatCurrency,
   formatDateTime,
+  formatISTNow,
   isToday,
+  istDateKey,
   parseSheetTimestamp,
+  todayKey,
 } from '../../utils/format';
 
 type SearchField = 'receiptNo' | 'donorName' | 'phone' | 'date' | 'paymentMode';
@@ -52,12 +55,7 @@ const EXPORT_COLUMNS = [
 ];
 
 function recordDateKey(d: DonationRecord): string {
-  const parsed = parseSheetTimestamp(d.timestamp);
-  if (!parsed) return d.timestamp.slice(0, 10);
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, '0');
-  const day = String(parsed.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return istDateKey(d.timestamp) ?? d.timestamp.slice(0, 10);
 }
 
 function recordTime(d: DonationRecord): number {
@@ -146,7 +144,7 @@ export function MyDonations() {
 
   const handleExportCsv = () => {
     downloadCsv(
-      `my-donations-${new Date().toISOString().slice(0, 10)}.csv`,
+      `my-donations-${todayKey()}.csv`,
       ['Receipt No', 'Date', 'Donor Name', 'Phone', 'Amount', 'Payment Mode', 'Purpose', 'Remarks'],
       filtered.map((d) => [
         d.receiptNo,
@@ -180,7 +178,7 @@ export function MyDonations() {
     doc.setTextColor(110);
     doc.text(`Collector: ${user?.collectorName ?? ''}`, margin, y);
     doc.text(
-      `Exported: ${new Date().toLocaleString()} (${filtered.length} donations)`,
+      `Exported: ${formatISTNow()} (${filtered.length} donations)`,
       pageWidth - margin,
       y,
       { align: 'right' },
@@ -245,7 +243,7 @@ export function MyDonations() {
       { align: 'right' },
     );
 
-    doc.save(`my-donations-${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(`my-donations-${todayKey()}.pdf`);
   };
 
   if (!donations) {

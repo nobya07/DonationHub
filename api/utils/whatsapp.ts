@@ -38,6 +38,30 @@ export function normalizePhone(raw: string, countryCode: string): string {
   throw new Error('Invalid phone number. A 10-digit number is required.');
 }
 
+/**
+ * Formats the amount in Indian Rupees. The app already sends a formatted
+ * value (e.g. "₹1,250"); any other numeric value is formatted here so the
+ * receipt always shows the rupee symbol and Indian grouping.
+ */
+function formatAmountForMessage(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) return '';
+
+  if (trimmed.includes('₹')) return trimmed;
+
+  const numeric = Number(trimmed.replace(/[^0-9.]/g, ''));
+
+  if (!Number.isFinite(numeric)) return trimmed;
+
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(numeric);
+}
+
 export async function sendTextMessage(
   to: string,
   body: string
@@ -101,7 +125,7 @@ export function buildReceiptMessage(input: {
     '------------------------------',
     `Donor: ${input.donorName}`,
     `Phone: ${input.phone}`,
-    `Amount: ${input.amount}`,
+    `Amount: ${formatAmountForMessage(input.amount)}`,
     `Mode: ${input.paymentMode}`,
   ];
 

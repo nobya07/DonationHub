@@ -5,6 +5,7 @@ import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * Builds ESC/POS byte sequences for 58mm (32 chars) and 80mm (48 chars)
@@ -121,7 +122,9 @@ object EscPosBuilder {
         bold(true)
         text(center("Printer Test", 32))
         bold(false)
-        text(center(SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).format(Date()), 32))
+        text(center(SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
+            .apply { timeZone = TimeZone.getTimeZone("Asia/Kolkata") }
+            .format(Date()), 32))
         align(0)
         feed(3)
         cut()
@@ -165,7 +168,7 @@ object EscPosBuilder {
             infoRow("Donor Name", donorName, width)
             infoRow("Phone", phone, width)
             infoRow("Address", address, width)
-            infoRow("Amount", "₹ $amount", width, boldValue = true)
+            infoRow("Amount", amount, width, boldValue = true)
             infoRow("Payment Mode", paymentMode, width)
             infoRow("Purpose", purpose, width)
             infoRow("Remarks", remarks, width)

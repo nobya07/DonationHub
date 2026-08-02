@@ -14,6 +14,7 @@ import {
   type PrinterDevice,
   type PrinterStatus,
 } from '../../services/printer';
+import { formatTimestampMs } from '../../utils/format';
 
 type BusyAction = 'test' | 'connect' | 'forget' | 'reconnect' | null;
 
@@ -237,7 +238,7 @@ export function PrinterSettings() {
               <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Last Print</span>
               <span className="text-gray-900 dark:text-white">
                 {status?.lastPrintTime
-                  ? new Date(status.lastPrintTime).toLocaleString()
+                  ? formatTimestampMs(status.lastPrintTime)
                   : 'Never'}
               </span>
             </div>

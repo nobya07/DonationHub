@@ -1,4 +1,5 @@
 import { google, type sheets_v4 } from 'googleapis';
+import { formatISTTimestamp } from './time.js';
 
 let sheetsInstance: sheets_v4.Sheets | null = null;
 
@@ -470,7 +471,7 @@ const WHATSAPP_SHEET_NAME = 'WhatsAppMessages';
 const WHATSAPP_SHEET_RANGE = 'WhatsAppMessages!A:E';
 
 function currentTimestamp(): string {
-  return new Date().toISOString();
+  return formatISTTimestamp();
 }
 
 async function ensureWhatsAppSheet(): Promise<void> {

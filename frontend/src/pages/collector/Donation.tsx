@@ -7,7 +7,7 @@ import { App as CapApp } from '@capacitor/app';
 import { useAuth } from '../../hooks/useAuth';
 import { submitDonation, isNetworkError } from '../../services/donations';
 import { addPendingDonation } from '../../services/offlineQueue';
-import { sendReceipt, getStatus } from '../../services/whatsapp';
+import { shareReceiptOnWhatsApp } from '../../services/whatsapp';
 import { setBackGuard } from '../../services/backGuard';
 import {
   connectPrinter,
@@ -28,7 +28,7 @@ import { Card } from '../../components/ui/Card';
 import { Modal } from '../../components/Modal';
 import { useToast } from '../../components/Toast';
 import { ErrorDialog } from '../../components/ErrorDialog';
-import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+import { formatCurrency, formatISTNow } from '../../utils/format';
 
 const donationSchema = z.object({
   donorName: z.string().min(1, 'Donor name is required'),
@@ -61,12 +61,11 @@ interface SuccessState {
   date: string;
   address: string;
   offline: boolean;
+  timestamp: number;
 }
 
 interface WhatsAppState {
-  phase: 'idle' | 'sending' | 'sent' | 'failed';
-  messageId?: string;
-  delivery?: string;
+  phase: 'idle' | 'sharing' | 'done' | 'error';
   error?: string;
 }
 
@@ -76,17 +75,6 @@ interface PrintState {
   phase: PrintPhase;
 }
 
-const DELIVERY_LABELS: Record<string, string> = {
-  sent: 'Sent',
-  delivered: 'Delivered',
-  read: 'Read',
-  failed: 'Failed',
-};
-
-function deliveryLabel(status: string): string {
-  return DELIVERY_LABELS[status] ?? status;
-}
-
 export function Donation() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -94,13 +82,9 @@ export function Donation() {
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const submittedRef = useRef(false);
   const [whatsapp, setWhatsapp] = useState<WhatsAppState>({ phase: 'idle' });
-  const whatsappPollRef = useRef<number | null>(null);
-  const whatsappSendingRef = useRef(false);
-  const whatsappRetriedRef = useRef(false);
 
   const isNative = isNativeApp();
   const showToast = useToast();
-  const isOnline = useNetworkStatus();
   const [printerStatus, setPrinterStatus] = useState<PrinterStatus | null>(null);
   const [printState, setPrintState] = useState<PrintState>({ phase: 'idle' });
   const [devices, setDevices] = useState<PrinterDevice[]>([]);
@@ -238,87 +222,30 @@ export function Donation() {
   const printing =
     printState.phase === 'connecting' || printState.phase === 'printing';
 
-  useEffect(() => {
-    return () => {
-      if (whatsappPollRef.current !== null) {
-        window.clearInterval(whatsappPollRef.current);
-      }
-    };
-  }, []);
+  const handleShareWhatsApp = async () => {
+    if (!success || whatsapp.phase === 'sharing') return;
 
-  const pollDeliveryStatus = (messageId: string) => {
-    let attempts = 0;
+    setWhatsapp({ phase: 'sharing' });
 
-    if (whatsappPollRef.current !== null) {
-      window.clearInterval(whatsappPollRef.current);
-    }
+    const result = await shareReceiptOnWhatsApp({
+      receiptNo: success.receiptNumber,
+      donorName: success.donorName,
+      phone: success.phone,
+      amount: success.amount,
+      paymentMode: success.paymentMode,
+      purpose: success.purpose,
+      collectorName: success.collectorName,
+      date: success.timestamp,
+    });
 
-    whatsappPollRef.current = window.setInterval(async () => {
-      attempts += 1;
-
-      try {
-        const delivery = await getStatus(messageId);
-
-        setWhatsapp((prev) =>
-          prev.phase === 'sent' ? { ...prev, delivery } : prev
-        );
-
-        const terminal =
-          delivery === 'delivered' ||
-          delivery === 'read' ||
-          delivery === 'failed' ||
-          attempts >= 15;
-
-        if (terminal && whatsappPollRef.current !== null) {
-          window.clearInterval(whatsappPollRef.current);
-        }
-      } catch {
-        if (attempts >= 15 && whatsappPollRef.current !== null) {
-          window.clearInterval(whatsappPollRef.current);
-        }
-      }
-    }, 4000);
-  };
-
-  const sendWhatsApp = async (success: SuccessState) => {
-    if (whatsappSendingRef.current) return;
-    whatsappSendingRef.current = true;
-    setWhatsapp({ phase: 'sending' });
-
-    try {
-      const result = await sendReceipt({
-        receiptNo: success.receiptNumber,
-        donorName: success.donorName,
-        phone: success.phone,
-        amount: success.amount.toFixed(2),
-        paymentMode: success.paymentMode,
-        purpose: success.purpose,
-        collectorName: success.collectorName,
-        date: success.date,
-      });
-
+    if (result.success) {
+      setWhatsapp({ phase: 'done' });
+      showToast('WhatsApp opened — press Send to deliver the receipt.');
+    } else {
       setWhatsapp({
-        phase: 'sent',
-        messageId: result.messageId,
-        delivery: result.status,
-      });
-      pollDeliveryStatus(result.messageId);
-    } catch (err) {
-      if (!whatsappRetriedRef.current) {
-        whatsappRetriedRef.current = true;
-        window.setTimeout(() => {
-          whatsappSendingRef.current = false;
-          void sendWhatsApp(success);
-        }, 3000);
-        return;
-      }
-      whatsappSendingRef.current = false;
-      setWhatsapp({
-        phase: 'failed',
+        phase: 'error',
         error:
-          err instanceof Error
-            ? err.message
-            : 'Failed to send WhatsApp receipt',
+          result.error ?? 'Could not open WhatsApp. Please try again.',
       });
     }
   };
@@ -398,7 +325,7 @@ export function Donation() {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Amount</span>
-                <span className="font-semibold text-gray-900 dark:text-white">${Number(success.amount).toFixed(2)}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(Number(success.amount))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Payment</span>
@@ -430,7 +357,7 @@ export function Donation() {
                     disabled={printing || printState.phase === 'picker'}
                     onClick={handlePrint}
                   >
-                    Print Receipt
+                    🖨 Print Receipt
                   </Button>
 
                   {printState.phase === 'connecting' && (
@@ -528,31 +455,29 @@ export function Donation() {
                 variant="secondary"
                 size="lg"
                 className="w-full"
-                disabled={whatsapp.phase === 'sending' || !isOnline}
-                onClick={() => sendWhatsApp(success)}
+                loading={whatsapp.phase === 'sharing'}
+                disabled={whatsapp.phase === 'sharing'}
+                onClick={handleShareWhatsApp}
               >
-                {whatsapp.phase === 'sending'
-                  ? 'Sending...'
-                  : !isOnline
-                    ? 'Internet required to send WhatsApp receipt.'
-                    : 'Send WhatsApp Receipt'}
+                {whatsapp.phase === 'sharing'
+                  ? 'Opening WhatsApp…'
+                  : '📱 Share on WhatsApp'}
               </Button>
 
-              {whatsapp.phase === 'sent' && (
+              {whatsapp.phase === 'done' && (
                 <p className="text-sm text-green-600">
-                  WhatsApp: {deliveryLabel(whatsapp.delivery ?? 'sent')}
+                  WhatsApp opened — the receipt is pre-filled. Just press Send.
                 </p>
               )}
 
-              {whatsapp.phase === 'failed' && (
+              {whatsapp.phase === 'error' && (
                 <div className="rounded-lg bg-red-50 px-4 py-3 text-left text-sm text-red-700 space-y-2">
                   <p>
-                    WhatsApp receipt could not be sent.{' '}
                     {whatsapp.error}. Your donation is already saved.
                   </p>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => sendWhatsApp(success)}>
-                      Retry
+                    <Button size="sm" onClick={handleShareWhatsApp}>
+                      Try Again
                     </Button>
                   </div>
                 </div>
@@ -645,9 +570,10 @@ export function Donation() {
         paymentMode: data.paymentMode,
         purpose: data.purpose ?? '',
         remarks: data.remarks ?? '',
-        date: new Date().toLocaleString(),
+        date: formatISTNow(),
         address: data.address ?? '',
         offline: false,
+        timestamp: Date.now(),
       });
     } catch (err) {
       if (isNetworkError(err)) {
@@ -662,9 +588,10 @@ export function Donation() {
             paymentMode: data.paymentMode,
             purpose: data.purpose ?? '',
             remarks: data.remarks ?? '',
-            date: new Date().toLocaleString(),
+            date: formatISTNow(),
             address: data.address ?? '',
             offline: true,
+            timestamp: Date.now(),
           });
         } catch {
           setServerError(
