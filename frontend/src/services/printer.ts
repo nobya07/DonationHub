@@ -11,7 +11,7 @@ import { formatCurrency } from '../utils/format';
 export type { PrintResult, PrinterDevice, PrinterStatus } from 'bluetooth-printer';
 
 /** Change this to the temple name shown at the top of printed receipts. */
-export const TEMPLE_NAME = 'DonationHub';
+export const TEMPLE_NAME = 'अष्टविनायक युवक मंडळ';
 
 /** True only inside the Capacitor Android app (false in a normal browser). */
 export function isNativeApp(): boolean {

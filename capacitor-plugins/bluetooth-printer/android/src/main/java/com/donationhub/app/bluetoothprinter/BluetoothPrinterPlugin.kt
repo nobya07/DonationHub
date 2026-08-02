@@ -36,7 +36,11 @@ class BluetoothPrinterPlugin : Plugin() {
             call.reject("Bluetooth is disabled. Turn on Bluetooth to see paired printers.")
             return
         }
-        withPermission(call, ::getPairedPrinters)
+        withPermission(call, ::getPairedPrintersInternal)
+    }
+
+    private fun getPairedPrintersInternal(call: PluginCall) {
+        call.resolve(service.getPairedPrinters())
     }
 
     @PluginMethod
@@ -46,7 +50,21 @@ class BluetoothPrinterPlugin : Plugin() {
             call.reject("Printer MAC address is required")
             return
         }
-        withPermission(call, ::connect)
+        withPermission(call, ::connectInternal)
+    }
+
+    private fun connectInternal(call: PluginCall) {
+        val macAddress = call.getString("macAddress").orEmpty()
+        service.connect(
+            macAddress,
+            onSuccess = { message ->
+                call.resolve(JSObject().apply {
+                    put("success", true)
+                    put("message", message)
+                })
+            },
+            onFailure = { message -> call.reject(message) }
+        )
     }
 
     @PluginMethod
@@ -69,12 +87,38 @@ class BluetoothPrinterPlugin : Plugin() {
             call.reject("Receipt data is required")
             return
         }
-        withPermission(call, ::printReceipt)
+        withPermission(call, ::printReceiptInternal)
+    }
+
+    private fun printReceiptInternal(call: PluginCall) {
+        service.print(
+            call.getObject("receipt"),
+            onSuccess = { message ->
+                call.resolve(JSObject().apply {
+                    put("success", true)
+                    put("message", message)
+                })
+            },
+            onFailure = { message -> call.reject(message) }
+        )
     }
 
     @PluginMethod
     fun testPrint(call: PluginCall) {
-        withPermission(call, ::testPrint)
+        withPermission(call, ::testPrintInternal)
+    }
+
+    private fun testPrintInternal(call: PluginCall) {
+        service.print(
+            null,
+            onSuccess = { message ->
+                call.resolve(JSObject().apply {
+                    put("success", true)
+                    put("message", message)
+                })
+            },
+            onFailure = { message -> call.reject(message) }
+        )
     }
 
     @PluginMethod
@@ -134,10 +178,10 @@ class BluetoothPrinterPlugin : Plugin() {
         }
 
         when (original?.methodName) {
-            "getPairedPrinters" -> getPairedPrinters(original)
-            "connect" -> connect(original)
-            "printReceipt" -> printReceipt(original)
-            "testPrint" -> testPrint(original)
+            "getPairedPrinters" -> getPairedPrintersInternal(original)
+            "connect" -> connectInternal(original)
+            "printReceipt" -> printReceiptInternal(original)
+            "testPrint" -> testPrintInternal(original)
             else -> original?.reject("Unknown operation")
         }
     }

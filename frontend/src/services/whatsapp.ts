@@ -100,7 +100,7 @@ export function buildReceiptMessage(input: WhatsAppReceiptPayload): string {
     '',
     '🙏 Thank you for your support.',
     '',
-    '*DonationHub*',
+    '*अष्टविनायक युवक मंडळ*',
   ].join('\n');
 }
 

@@ -54,6 +54,38 @@ const EXPORT_COLUMNS = [
   { header: 'Remarks', width: 40 },
 ];
 
+/**
+ * Renders the Devanagari title on a canvas (the browser applies proper
+ * complex-script shaping) and returns a PNG data URL at PDF point size,
+ * since jsPDF's built-in fonts cannot render Devanagari glyphs.
+ */
+function renderDevanagariTitle(
+  text: string,
+  fontSizePt: number,
+): { dataUrl: string; width: number; height: number } | null {
+  const scale = 4;
+  const fontSizePx = fontSizePt * (96 / 72);
+  const font =
+    `${fontSizePx * scale}px 'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'Sanskrit Text', sans-serif`;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) return null;
+
+  ctx.font = font;
+  const width = Math.ceil(ctx.measureText(text).width / scale);
+  const height = Math.ceil(fontSizePx * 1.5);
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+
+  ctx.font = font;
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = '#000';
+  ctx.fillText(text, 0, 0);
+
+  return { dataUrl: canvas.toDataURL('image/png'), width, height };
+}
+
 function recordDateKey(d: DonationRecord): string {
   return istDateKey(d.timestamp) ?? d.timestamp.slice(0, 10);
 }
@@ -168,9 +200,14 @@ export function MyDonations() {
 
     let y = 52;
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text('DonationHub - My Donations', margin, y);
+    const titleImage = renderDevanagariTitle('अष्टविनायक युवक मंडळ - My Donations', 16);
+    if (titleImage) {
+      doc.addImage(titleImage.dataUrl, 'PNG', margin, y, titleImage.width, titleImage.height);
+    } else {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Astavinayak - My Donations', margin, y);
+    }
     y += 20;
 
     doc.setFont('helvetica', 'normal');

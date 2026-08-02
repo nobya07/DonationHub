@@ -115,7 +115,7 @@ object EscPosBuilder {
         align(1)
         doubleHeight(true)
         bold(true)
-        text(center("DonationHub", 32))
+        text(center("अष्टविनायक युवक मंडळ", 32))
         doubleHeight(false)
         bold(false)
         spacer()
@@ -136,7 +136,7 @@ object EscPosBuilder {
             else -> 32
         }
 
-        val templeName = receipt.getString("templeName") ?: "DonationHub"
+        val templeName = receipt.getString("templeName") ?: "अष्टविनायक युवक मंडळ"
         val receiptNo = receipt.getString("receiptNo") ?: ""
         val date = receipt.getString("date") ?: ""
         val collectorName = receipt.getString("collectorName") ?: ""

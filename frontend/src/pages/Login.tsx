@@ -70,7 +70,7 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">DonationHub</h1>
+          <h1 className="text-3xl font-bold text-gray-900">अष्टविनायक युवक मंडळ</h1>
           <p className="mt-2 text-sm text-gray-500">Sign in to continue</p>
         </div>
 
@@ -114,8 +114,10 @@ export function Login() {
           </form>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-gray-400">
-          DonationHub &mdash; Collector Portal
+        <p className="mt-6 text-center text-xs leading-relaxed text-gray-400">
+          By
+          <br />
+          <span className="font-medium text-gray-500">Gajendra Punekar</span>
         </p>
       </div>
     </div>

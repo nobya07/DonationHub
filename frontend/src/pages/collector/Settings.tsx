@@ -9,7 +9,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.0.0';
 
 const THEME_OPTIONS: { value: ThemePreference; label: string; hint: string }[] = [
   { value: 'light', label: 'Light Mode', hint: 'Always use the light theme' },
@@ -164,7 +164,7 @@ export function Settings() {
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              DonationHub
+              अष्टविनायक युवक मंडळ
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Donation collection &amp; receipt management for collectors.
@@ -172,7 +172,8 @@ export function Settings() {
           </div>
         </div>
         <div className="space-y-2">
-          {settingRow('Version', `v${version}`)}
+          {settingRow('Version', version)}
+          {settingRow('Developed by', 'Gajendra Punekar')}
           {settingRow(
             'App Update',
             checkingUpdate ? 'Checking…' : 'Check for the latest version',

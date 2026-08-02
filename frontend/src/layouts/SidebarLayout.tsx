@@ -28,7 +28,7 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
             </svg>
           </div>
           <div>
-            <p className="text-lg font-semibold leading-tight text-gray-900 dark:text-white">DonationHub</p>
+            <p className="text-lg font-semibold leading-tight text-gray-900 dark:text-white">अष्टविनायक युवक मंडळ</p>
             <p className="text-xs font-medium text-primary-600 dark:text-primary-400">{roleLabel}</p>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                 </svg>
               </div>
-              <span className="font-semibold text-gray-900 dark:text-white">DonationHub</span>
+              <span className="font-semibold text-gray-900 dark:text-white">अष्टविनायक युवक मंडळ</span>
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
               Logout
