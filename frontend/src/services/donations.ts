@@ -4,6 +4,7 @@ import type {
   DonationResponse,
   DonationRecord,
 } from '../types';
+import { API_BASE_URL } from './api';
 
 interface RawDonation {
   timestamp: string;
@@ -20,7 +21,7 @@ interface RawDonation {
 }
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

@@ -11,6 +11,7 @@ import {
   updateWhatsAppMessageStatus,
   getWhatsAppMessageStatus,
 } from './utils/sheets.js';
+import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
 
 interface SendReceiptBody {
   receiptNo?: string;
@@ -134,6 +135,9 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  if (sendCorsPreflight(req, res)) return;
+  applyCorsHeaders(req, res);
+
   if (req.method === 'GET' && req.query['hub.mode']) {
     const mode = req.query['hub.mode'];
     const verifyToken = req.query['hub.verify_token'];

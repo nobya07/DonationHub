@@ -6,6 +6,7 @@ import {
 } from './utils/sheets.js';
 import { requireAuth } from './utils/guard.js';
 import { formatISTTimestamp } from './utils/time.js';
+import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
 
 interface DonationBody {
   donorName?: string;
@@ -20,6 +21,9 @@ interface DonationBody {
 const REQUIRED_FIELDS = ['donorName', 'phone', 'amount', 'paymentMode'] as const;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (sendCorsPreflight(req, res)) return;
+  applyCorsHeaders(req, res);
+
   const session = requireAuth(req, res);
 
   if (!session) return;

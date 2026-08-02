@@ -1,8 +1,9 @@
 import axios from 'axios';
 import type { LoginResponse, VerifyResponse } from '../types';
+import { API_BASE_URL } from './api';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

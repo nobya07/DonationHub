@@ -4,11 +4,19 @@ import {
   createSessionToken,
   createSessionCookie,
 } from "./utils/session.js";
+import {
+  applyCorsHeaders,
+  isCrossOriginRequest,
+  sendCorsPreflight,
+} from "./utils/cors.js";
 
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  if (sendCorsPreflight(req, res)) return;
+  applyCorsHeaders(req, res);
+
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -50,7 +58,7 @@ export default async function handler(
       role: collector.role,
     });
 
-    res.setHeader("Set-Cookie", createSessionCookie(token));
+    res.setHeader("Set-Cookie", createSessionCookie(token, isCrossOriginRequest(req)));
 
     return res.status(200).json({
       collectorId: collector.collectorId,

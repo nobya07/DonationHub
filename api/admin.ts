@@ -10,6 +10,7 @@ import {
   type Collector,
 } from './utils/sheets.js';
 import { requireAdmin } from './utils/guard.js';
+import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
 
 interface CollectorBody {
   username?: string;
@@ -243,6 +244,9 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  if (sendCorsPreflight(req, res)) return;
+  applyCorsHeaders(req, res);
+
   const session = requireAdmin(req, res);
 
   if (!session) return;

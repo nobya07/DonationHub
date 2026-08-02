@@ -38,4 +38,20 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Package visibility for launching installed apps (Android 11+).
+         whatsapp:// is used to open the donor chat pre-filled; https://wa.me
+         is the web-style fallback link. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="whatsapp" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+            <data android:host="wa.me" />
+        </intent>
+    </queries>
+
 </manifest>

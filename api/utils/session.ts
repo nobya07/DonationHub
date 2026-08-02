@@ -36,21 +36,26 @@ export function verifySessionToken(
   }
 }
 
-export function createSessionCookie(token: string): string {
+export function createSessionCookie(
+  token: string,
+  crossOrigin: boolean
+): string {
   return serialize('session', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    // SameSite=None + Secure is required so the cookie is sent on requests
+    // from the native app (https://localhost) to the deployed API.
+    sameSite: crossOrigin ? 'none' : 'lax',
     path: '/',
     maxAge: 60 * 60 * 24,
   });
 }
 
-export function clearSessionCookie(): string {
+export function clearSessionCookie(crossOrigin: boolean): string {
   return serialize('session', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: crossOrigin ? 'none' : 'lax',
     path: '/',
     maxAge: 0,
   });
