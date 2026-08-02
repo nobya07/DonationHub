@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Astavinayak</string>
-    <string name="title_activity_main">Astavinayak</string>
-    <string name="package_name">com.donationhub.app</string>
-    <string name="custom_url_scheme">com.donationhub.app</string>
-</resources>
