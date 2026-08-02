@@ -22,11 +22,11 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 md:flex">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 md:flex">
         <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-            </svg>
-          </div>
+          <img
+            src="/app-icon.png"
+            alt="Logo"
+            className="h-10 w-10 rounded-lg object-cover"
+          />
           <div>
             <p className="text-lg font-semibold leading-tight text-gray-900 dark:text-white">अष्टविनायक युवक मंडळ</p>
             <p className="text-xs font-medium text-primary-600 dark:text-primary-400">{roleLabel}</p>
@@ -68,11 +68,11 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/80 safe-top md:hidden">
           <div className="flex h-14 items-center justify-between px-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                </svg>
-              </div>
+              <img
+                src="/app-icon.png"
+                alt="Logo"
+                className="h-10 w-10 rounded-lg object-cover"
+              />
               <span className="font-semibold text-gray-900 dark:text-white">अष्टविनायक युवक मंडळ</span>
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
