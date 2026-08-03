@@ -1,0 +1,31 @@
+{
+  "name": "file-opener",
+  "version": "0.0.1",
+  "description": "Opens saved files with the device's default viewer for DonationHub (Capacitor Android)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": [
+    "dist",
+    "android"
+  ],
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "android",
+    "file",
+    "opener"
+  ],
+  "license": "MIT",
+  "capacitor": {
+    "android": {
+      "src": "android"
+    }
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.6.8"
+  }
+}

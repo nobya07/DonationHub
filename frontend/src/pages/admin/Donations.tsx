@@ -8,7 +8,9 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/StatCard';
 import { PageLoader } from '../../components/PageLoader';
 import { formatCurrency, formatDateTime, isWithinRange, todayKey } from '../../utils/format';
-import { downloadCsv } from '../../utils/csv';
+import { downloadCsv, toCsv } from '../../utils/csv';
+import { useToast } from '../../components/Toast';
+import { base64FromUtf8, isCapacitorAndroid, saveAndOpenFile } from '../../utils/exportFile';
 
 const PAYMENT_MODES = [
   { value: '', label: 'All Modes' },
@@ -17,6 +19,7 @@ const PAYMENT_MODES = [
 ];
 
 export function Donations() {
+  const showToast = useToast();
   const [donations, setDonations] = useState<DonationRecord[] | null>(null);
   const [collectors, setCollectors] = useState<AdminCollector[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -80,24 +83,52 @@ export function Donations() {
     setTo('');
   };
 
-  const handleExport = () => {
-    downloadCsv(
-      `donations-${todayKey()}.csv`,
-      ['Receipt No', 'Date', 'Collector ID', 'Collector', 'Donor', 'Phone', 'Address', 'Amount', 'Payment Mode', 'Purpose', 'Remarks'],
-      filtered.map((d) => [
-        d.receiptNo,
-        d.timestamp,
-        d.collectorId,
-        d.collectorName,
-        d.donorName,
-        d.phone,
-        d.address,
-        d.amount,
-        d.paymentMode,
-        d.purpose,
-        d.remarks,
-      ]),
-    );
+  const handleExport = async () => {
+    const filename = `donations-${todayKey()}.csv`;
+    const headers = [
+      'Receipt No',
+      'Date',
+      'Collector ID',
+      'Collector',
+      'Donor',
+      'Phone',
+      'Address',
+      'Amount',
+      'Payment Mode',
+      'Purpose',
+      'Remarks',
+    ];
+    const rows = filtered.map((d) => [
+      d.receiptNo,
+      d.timestamp,
+      d.collectorId,
+      d.collectorName,
+      d.donorName,
+      d.phone,
+      d.address,
+      d.amount,
+      d.paymentMode,
+      d.purpose,
+      d.remarks,
+    ]);
+
+    if (isCapacitorAndroid()) {
+      try {
+        const location = await saveAndOpenFile({
+          filename,
+          data: base64FromUtf8(toCsv(headers, rows)),
+          mimeType: 'text/csv',
+        });
+        showToast(`Saved ${filename} to ${location.replace(/^file:\/\//, '')}`);
+      } catch (err) {
+        showToast(
+          err instanceof Error ? `Could not save ${filename}: ${err.message}` : `Could not save ${filename}`,
+        );
+      }
+      return;
+    }
+
+    downloadCsv(filename, headers, rows);
   };
 
   if (!donations) {

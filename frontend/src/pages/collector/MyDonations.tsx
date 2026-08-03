@@ -9,7 +9,14 @@ import { PageLoader } from '../../components/PageLoader';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { downloadCsv } from '../../utils/csv';
+import { useToast } from '../../components/Toast';
+import { downloadCsv, toCsv } from '../../utils/csv';
+import {
+  base64FromDataUrl,
+  base64FromUtf8,
+  isCapacitorAndroid,
+  saveAndOpenFile,
+} from '../../utils/exportFile';
 import {
   formatCurrency,
   formatDateTime,
@@ -96,6 +103,7 @@ function recordTime(d: DonationRecord): number {
 
 export function MyDonations() {
   const { user } = useAuth();
+  const showToast = useToast();
   const [donations, setDonations] = useState<DonationRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -174,24 +182,49 @@ export function MyDonations() {
     setSortBy('newest');
   };
 
-  const handleExportCsv = () => {
-    downloadCsv(
-      `my-donations-${todayKey()}.csv`,
-      ['Receipt No', 'Date', 'Donor Name', 'Phone', 'Amount', 'Payment Mode', 'Purpose', 'Remarks'],
-      filtered.map((d) => [
-        d.receiptNo,
-        d.timestamp,
-        d.donorName,
-        d.phone,
-        d.amount,
-        d.paymentMode,
-        d.purpose,
-        d.remarks,
-      ]),
-    );
+  const handleExportCsv = async () => {
+    const filename = `my-donations-${todayKey()}.csv`;
+    const headers = [
+      'Receipt No',
+      'Date',
+      'Donor Name',
+      'Phone',
+      'Amount',
+      'Payment Mode',
+      'Purpose',
+      'Remarks',
+    ];
+    const rows = filtered.map((d) => [
+      d.receiptNo,
+      d.timestamp,
+      d.donorName,
+      d.phone,
+      d.amount,
+      d.paymentMode,
+      d.purpose,
+      d.remarks,
+    ]);
+
+    if (isCapacitorAndroid()) {
+      try {
+        const location = await saveAndOpenFile({
+          filename,
+          data: base64FromUtf8(toCsv(headers, rows)),
+          mimeType: 'text/csv',
+        });
+        showToast(`Saved ${filename} to ${location.replace(/^file:\/\//, '')}`);
+      } catch (err) {
+        showToast(
+          err instanceof Error ? `Could not save ${filename}: ${err.message}` : `Could not save ${filename}`,
+        );
+      }
+      return;
+    }
+
+    downloadCsv(filename, headers, rows);
   };
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 40;
@@ -280,7 +313,25 @@ export function MyDonations() {
       { align: 'right' },
     );
 
-    doc.save(`my-donations-${todayKey()}.pdf`);
+    const filename = `my-donations-${todayKey()}.pdf`;
+
+    if (isCapacitorAndroid()) {
+      try {
+        const location = await saveAndOpenFile({
+          filename,
+          data: base64FromDataUrl(doc.output('datauristring')),
+          mimeType: 'application/pdf',
+        });
+        showToast(`Saved ${filename} to ${location.replace(/^file:\/\//, '')}`);
+      } catch (err) {
+        showToast(
+          err instanceof Error ? `Could not save ${filename}: ${err.message}` : `Could not save ${filename}`,
+        );
+      }
+      return;
+    }
+
+    doc.save(filename);
   };
 
   if (!donations) {

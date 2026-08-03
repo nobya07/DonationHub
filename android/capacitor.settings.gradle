@@ -8,6 +8,9 @@ project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/
 include ':capacitor-app-launcher'
 project(':capacitor-app-launcher').projectDir = new File('../node_modules/@capacitor/app-launcher/android')
 
+include ':capacitor-filesystem'
+project(':capacitor-filesystem').projectDir = new File('../node_modules/@capacitor/filesystem/android')
+
 include ':capacitor-preferences'
 project(':capacitor-preferences').projectDir = new File('../node_modules/@capacitor/preferences/android')
 
@@ -16,3 +19,6 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 
 include ':bluetooth-printer'
 project(':bluetooth-printer').projectDir = new File('../capacitor-plugins/bluetooth-printer/android')
+
+include ':file-opener'
+project(':file-opener').projectDir = new File('../capacitor-plugins/file-opener/android')

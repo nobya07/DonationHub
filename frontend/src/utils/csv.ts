@@ -10,14 +10,21 @@ function escapeCell(value: CsvValue): string {
   return text;
 }
 
+export function toCsv(
+  headers: string[],
+  rows: CsvValue[][],
+): string {
+  return [headers, ...rows]
+    .map((row) => row.map(escapeCell).join(','))
+    .join('\n');
+}
+
 export function downloadCsv(
   filename: string,
   headers: string[],
   rows: CsvValue[][],
 ): void {
-  const csv = [headers, ...rows]
-    .map((row) => row.map(escapeCell).join(','))
-    .join('\n');
+  const csv = toCsv(headers, rows);
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);

@@ -8,9 +8,12 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/StatCard';
 import { PageLoader } from '../../components/PageLoader';
 import { formatCurrency, isWithinRange, monthKey, formatMonth, currentMonthStart, todayKey } from '../../utils/format';
-import { downloadCsv } from '../../utils/csv';
+import { downloadCsv, toCsv } from '../../utils/csv';
+import { useToast } from '../../components/Toast';
+import { base64FromUtf8, isCapacitorAndroid, saveAndOpenFile } from '../../utils/exportFile';
 
 export function Reports() {
+  const showToast = useToast();
   const [donations, setDonations] = useState<DonationRecord[] | null>(null);
   const [collectors, setCollectors] = useState<AdminCollector[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -96,12 +99,28 @@ export function Reports() {
     };
   }, [donations, from, to, collectorId]);
 
-  const handleExport = () => {
-    downloadCsv(
-      `donation-report-${from}-to-${to}.csv`,
-      ['Month', 'Donations', 'Amount'],
-      report.monthly.map((m) => [formatMonth(m.key), m.count, Number(m.amount.toFixed(2))]),
-    );
+  const handleExport = async () => {
+    const filename = `donation-report-${from}-to-${to}.csv`;
+    const headers = ['Month', 'Donations', 'Amount'];
+    const rows = report.monthly.map((m) => [formatMonth(m.key), m.count, Number(m.amount.toFixed(2))]);
+
+    if (isCapacitorAndroid()) {
+      try {
+        const location = await saveAndOpenFile({
+          filename,
+          data: base64FromUtf8(toCsv(headers, rows)),
+          mimeType: 'text/csv',
+        });
+        showToast(`Saved ${filename} to ${location.replace(/^file:\/\//, '')}`);
+      } catch (err) {
+        showToast(
+          err instanceof Error ? `Could not save ${filename}: ${err.message}` : `Could not save ${filename}`,
+        );
+      }
+      return;
+    }
+
+    downloadCsv(filename, headers, rows);
   };
 
   if (!donations) {
