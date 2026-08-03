@@ -17,19 +17,19 @@ export interface PrintResult {
     success: boolean;
     message: string;
 }
+export interface ReceiptLineSegment {
+    text: string;
+    bold?: boolean;
+}
+export interface ReceiptLine {
+    segments: ReceiptLineSegment[];
+    align?: 'left' | 'center';
+}
 export interface ReceiptData {
-    templeName: string;
-    receiptNo: string;
-    date: string;
-    collectorName: string;
-    donorName: string;
-    phone: string;
-    address: string;
-    amount: string;
-    paymentMode: string;
-    purpose?: string;
-    remarks?: string;
-    thankYou?: string;
+    /** Full plain-text receipt (the shared receipt template). */
+    receiptText: string;
+    /** Structured lines so the printer can apply ESC/POS bold/alignment. */
+    lines: ReceiptLine[];
     paperWidth?: 58 | 80;
 }
 export interface BluetoothPrinterPlugin {

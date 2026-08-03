@@ -20,10 +20,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={`block w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 ${
+          className={`block w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 dark:bg-surface-raised dark:text-gray-100 dark:placeholder-gray-500 ${
             error
-              ? 'border-red-300 focus:border-red-400 focus:ring-red-200 dark:border-red-700'
-              : 'border-gray-300 focus:border-primary-400 focus:ring-primary-200 dark:border-gray-600'
+              ? 'border-red-300 focus:border-red-400 focus:ring-red-200 dark:border-red-700 dark:focus:ring-red-800'
+              : 'border-gray-300 focus:border-primary-400 focus:ring-primary-200 dark:border-gray-600 dark:focus:border-primary-500 dark:focus:ring-primary-900'
           } ${className}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}

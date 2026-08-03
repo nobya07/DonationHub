@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getDonations, getCollectors } from '../../services/admin';
 import type { AdminCollector, DonationRecord } from '../../types';
 import { Card } from '../../components/ui/Card';
@@ -139,8 +140,8 @@ export function Donations() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">All Donations</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">All Donations</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             View, search and export every donation.
           </p>
         </div>
@@ -148,7 +149,7 @@ export function Donations() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300" role="alert">
           {error}
         </div>
       )}
@@ -206,7 +207,7 @@ export function Donations() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-line text-xs uppercase tracking-wide text-gray-500 dark:border-line-dark dark:text-gray-400">
                 <th className="px-3 py-2 font-medium">Receipt</th>
                 <th className="px-3 py-2 font-medium">Date</th>
                 <th className="px-3 py-2 font-medium">Collector</th>
@@ -215,26 +216,35 @@ export function Donations() {
                 <th className="px-3 py-2 font-medium">Amount</th>
                 <th className="px-3 py-2 font-medium">Mode</th>
                 <th className="px-3 py-2 font-medium">Purpose</th>
+                <th className="px-3 py-2 font-medium">Action</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400">
                     No donations match your filters.
                   </td>
                 </tr>
               )}
               {filtered.map((d) => (
-                <tr key={d.receiptNo} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                  <td className="px-3 py-2.5 font-mono text-xs font-medium text-gray-900">{d.receiptNo}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{formatDateTime(d.timestamp)}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{d.collectorName}</td>
-                  <td className="px-3 py-2.5 font-medium text-gray-900">{d.donorName}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{d.phone}</td>
-                  <td className="px-3 py-2.5 font-semibold text-gray-900">{formatCurrency(d.amount)}</td>
-                  <td className="px-3 py-2.5 capitalize text-gray-600">{d.paymentMode}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{d.purpose || '-'}</td>
+                <tr key={d.receiptNo} className="border-b border-line last:border-0 hover:bg-gray-50 dark:border-line-dark dark:hover:bg-surface-raised">
+                  <td className="px-3 py-2.5 font-mono text-xs font-medium text-gray-900 dark:text-white">{d.receiptNo}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{formatDateTime(d.timestamp)}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.collectorName}</td>
+                  <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{d.donorName}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.phone}</td>
+                  <td className="px-3 py-2.5 font-semibold text-gray-900 dark:text-white">{formatCurrency(d.amount)}</td>
+                  <td className="px-3 py-2.5 capitalize text-gray-600 dark:text-gray-300">{d.paymentMode}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.purpose || '-'}</td>
+                  <td className="px-3 py-2.5">
+                    <Link
+                      to={`/admin/receipt/${encodeURIComponent(d.receiptNo)}`}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      View Receipt
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

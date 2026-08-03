@@ -4,27 +4,46 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#16a34a" />
+    <meta name="theme-color" content="#f57c00" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('dh_theme');
+          var dark =
+            stored === 'dark' ||
+            (stored !== 'light' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) {
+            document.documentElement.classList.add('dark');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#121212');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <title>अष्टविनायक युवक मंडळ</title>
   </head>
-  <body class="bg-gray-50 text-gray-900 antialiased">
+  <body class="bg-canvas text-gray-900 antialiased">
     <div id="app-splash" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:#ffffff;">
       <img src="/app-icon.png" alt="अष्टविनायक युवक मंडळ" style="width:88px;height:88px;border-radius:22px;" />
       <div style="font-family:Inter,system-ui,sans-serif;font-size:1.35rem;font-weight:700;color:#111827;">अष्टविनायक युवक मंडळ</div>
       <div style="display:flex;align-items:center;gap:0.5rem;font-family:Inter,system-ui,sans-serif;font-size:0.875rem;color:#6b7280;">
         <svg class="app-splash-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation:app-splash-rotate 0.9s linear infinite;">
           <circle cx="12" cy="12" r="9" stroke="#e5e7eb" stroke-width="3"/>
-          <path d="M21 12a9 9 0 0 0-9-9" stroke="#16a34a" stroke-width="3" stroke-linecap="round"/>
+          <path d="M21 12a9 9 0 0 0-9-9" stroke="#f57c00" stroke-width="3" stroke-linecap="round"/>
         </svg>
         Loading...
       </div>
       <style>
         @keyframes app-splash-rotate { to { transform: rotate(360deg); } }
+        html.dark #app-splash { background: #121212 !important; }
+        html.dark #app-splash div:nth-of-type(1) { color: #ffffff !important; }
+        html.dark #app-splash .app-splash-spinner circle { stroke: #333333; }
       </style>
     </div>
     <div id="root"></div>

@@ -67,18 +67,18 @@ export function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-100 via-canvas to-primary-100 px-4 dark:from-primary-950 dark:via-canvas-dark dark:to-primary-950">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">अष्टविनायक युवक मंडळ</h1>
-          <p className="mt-2 text-sm text-gray-500">Sign in to continue</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">अष्टविनायक युवक मंडळ</h1>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Sign in to continue</p>
         </div>
 
         <Card padding="lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             {serverError && (
               <div
-                className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
                 role="alert"
               >
                 {serverError}
@@ -114,10 +114,10 @@ export function Login() {
           </form>
         </Card>
 
-        <p className="mt-6 text-center text-xs leading-relaxed text-gray-400">
+        <p className="mt-6 text-center text-xs leading-relaxed text-gray-400 dark:text-gray-500">
           By
           <br />
-          <span className="font-medium text-gray-500">Gajendra Punekar</span>
+          <span className="font-medium text-gray-500 dark:text-gray-400">Gajendra Punekar</span>
         </p>
       </div>
     </div>

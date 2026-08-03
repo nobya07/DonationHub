@@ -130,60 +130,64 @@ object EscPosBuilder {
         cut()
     }
 
+    /**
+     * Renders the structured receipt lines produced by the shared JS receipt
+     * template. Bold/alignment come from the line metadata, so the printed
+     * receipt always matches the WhatsApp/PDF/details-page layout.
+     */
     fun receipt(receipt: JSObject): ByteArray {
         val width = when (receipt.optInt("paperWidth", 58)) {
             80 -> 48
             else -> 32
         }
 
-        val templeName = receipt.getString("templeName") ?: "अष्टविनायक युवक मंडळ"
-        val receiptNo = receipt.getString("receiptNo") ?: ""
-        val date = receipt.getString("date") ?: ""
-        val collectorName = receipt.getString("collectorName") ?: ""
-        val donorName = receipt.getString("donorName") ?: ""
-        val phone = receipt.getString("phone") ?: ""
-        val address = receipt.getString("address") ?: ""
-        val purpose = receipt.getString("purpose") ?: ""
-        val remarks = receipt.getString("remarks") ?: ""
-        val paymentMode = receipt.getString("paymentMode") ?: ""
-        val amount = receipt.getString("amount") ?: ""
+        val lines = receipt.optJSONArray("lines") ?: return build {
+            initialize()
+            feed(3)
+            cut()
+        }
 
         return build {
             initialize()
 
-            separator(width)
-            align(1)
-            doubleHeight(true)
-            bold(true)
-            templeName.split("\n").forEach { text(center(it.trim(), width)) }
-            doubleHeight(false)
-            bold(false)
-            align(0)
-            separator(width)
+            for (i in 0 until lines.length()) {
+                val line = lines.optJSONObject(i) ?: continue
+                val align = line.optString("align", "left")
+                val segments = line.optJSONArray("segments")
 
-            spacer()
-            infoRow("Receipt Number", receiptNo, width)
-            infoRow("Date", date, width)
-            infoRow("Collector", collectorName, width)
-            infoRow("Donor Name", donorName, width)
-            infoRow("Phone", phone, width)
-            infoRow("Address", address, width)
-            infoRow("Amount", amount, width, boldValue = true)
-            infoRow("Payment Mode", paymentMode, width)
-            infoRow("Purpose", purpose, width)
-            infoRow("Remarks", remarks, width)
+                if (segments == null || segments.length() == 0) {
+                    spacer()
+                    continue
+                }
 
-            separator(width)
-            spacer()
+                val isEmpty = (0 until segments.length()).all { j ->
+                    segments.optJSONObject(j)?.optString("text", "")?.isBlank() != false
+                }
 
-            align(1)
-            bold(true)
-            text(center("Thank You", width))
-            bold(false)
-            text(center("Visit Again", width))
-            align(0)
+                if (isEmpty) {
+                    spacer()
+                    continue
+                }
 
-            separator(width)
+                align(if (align == "center") 1 else 0)
+
+                for (j in 0 until segments.length()) {
+                    val segment = segments.optJSONObject(j) ?: continue
+                    val text = segment.optString("text", "")
+                    val bold = segment.optBoolean("bold", false)
+
+                    bold(bold)
+
+                    val rendered = wrap(text, width)
+                    if (align == "center") {
+                        rendered.forEach { text(center(it, width)) }
+                    } else {
+                        rendered.forEach { text(it) }
+                    }
+
+                    bold(false)
+                }
+            }
 
             feed(3)
             cut()

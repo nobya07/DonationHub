@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import { useAuth } from '../../hooks/useAuth';
 import { getMyDonations } from '../../services/donations';
@@ -343,7 +344,7 @@ export function MyDonations() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">My Donations</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Donations collected by you. {filtered.length} of {donations.length} shown.
           </p>
         </div>
@@ -358,7 +359,7 @@ export function MyDonations() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300" role="alert">
           <div className="flex items-center justify-between gap-3">
             <p>{error}</p>
             <Button
@@ -430,7 +431,7 @@ export function MyDonations() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <tr className="border-b border-gray-200 dark:border-gray-700 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 <th className="px-3 py-2 font-medium">Receipt Number</th>
                 <th className="px-3 py-2 font-medium">Date</th>
                 <th className="px-3 py-2 font-medium">Donor Name</th>
@@ -439,12 +440,13 @@ export function MyDonations() {
                 <th className="px-3 py-2 font-medium">Payment Mode</th>
                 <th className="px-3 py-2 font-medium">Purpose</th>
                 <th className="px-3 py-2 font-medium">Remarks</th>
+                <th className="px-3 py-2 font-medium">Action</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                  <td colSpan={9} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400">
                     {donations.length === 0
                       ? 'No donations found.'
                       : 'No donations match your search.'}
@@ -452,7 +454,7 @@ export function MyDonations() {
                 </tr>
               )}
               {filtered.map((d) => (
-                <tr key={d.receiptNo} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:bg-gray-800">
+                <tr key={d.receiptNo} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-surface-raised">
                   <td className="px-3 py-2.5 font-mono text-xs font-medium text-gray-900 dark:text-white">{d.receiptNo}</td>
                   <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{formatDateTime(d.timestamp)}</td>
                   <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{d.donorName}</td>
@@ -461,6 +463,14 @@ export function MyDonations() {
                   <td className="px-3 py-2.5 capitalize text-gray-600 dark:text-gray-300">{d.paymentMode}</td>
                   <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.purpose || '-'}</td>
                   <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{d.remarks || '-'}</td>
+                  <td className="px-3 py-2.5">
+                    <Link
+                      to={`/receipt/${encodeURIComponent(d.receiptNo)}`}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      View Receipt
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

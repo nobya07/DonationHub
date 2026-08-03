@@ -6,12 +6,9 @@ import {
   type PrinterStatus,
   type ReceiptData,
 } from 'bluetooth-printer';
-import { formatCurrency } from '../utils/format';
+import { buildReceiptLines, buildReceiptText } from '../utils/receipt';
 
 export type { PrintResult, PrinterDevice, PrinterStatus } from 'bluetooth-printer';
-
-/** Change this to the temple name shown at the top of printed receipts. */
-export const TEMPLE_NAME = 'अष्टविनायक युवक मंडळ';
 
 /** True only inside the Capacitor Android app (false in a normal browser). */
 export function isNativeApp(): boolean {
@@ -85,24 +82,32 @@ export interface PrinterReceiptInput {
   purpose: string;
   remarks: string;
   collectorName: string;
-  date: string;
+  /** Epoch milliseconds of the donation (IST wall time). */
+  date: number;
 }
 
 export function printReceipt(
   input: PrinterReceiptInput,
 ): Promise<PrintResult> {
   const receipt: ReceiptData = {
-    templeName: TEMPLE_NAME,
-    receiptNo: input.receiptNumber,
-    date: input.date,
-    collectorName: input.collectorName,
-    donorName: input.donorName,
-    phone: input.phone,
-    address: input.address,
-    amount: formatCurrency(input.amount),
-    paymentMode: input.paymentMode.toUpperCase(),
-    purpose: input.purpose,
-    remarks: input.remarks,
+    receiptText: buildReceiptText({
+      receiptNo: input.receiptNumber,
+      donorName: input.donorName,
+      amount: input.amount,
+      paymentMode: input.paymentMode,
+      purpose: input.purpose,
+      collectorName: input.collectorName,
+      date: input.date,
+    }),
+    lines: buildReceiptLines({
+      receiptNo: input.receiptNumber,
+      donorName: input.donorName,
+      amount: input.amount,
+      paymentMode: input.paymentMode,
+      purpose: input.purpose,
+      collectorName: input.collectorName,
+      date: input.date,
+    }),
     paperWidth: 58,
   };
 

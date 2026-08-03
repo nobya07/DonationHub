@@ -23,7 +23,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
       aria-modal="true"
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 card-shadow dark:bg-gray-900"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 card-shadow dark:bg-surface-dark"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

@@ -19,9 +19,9 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
   const { user, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 md:flex">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 md:flex">
-        <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <div className="min-h-screen bg-canvas text-gray-900 dark:bg-canvas-dark dark:text-white md:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-surface dark:border-line-dark dark:bg-surface-dark md:flex">
+        <div className="flex items-center gap-3 border-b border-line px-5 py-4 dark:border-line-dark">
           <img
             src="/app-icon.png"
             alt="Logo"
@@ -42,7 +42,7 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300'
+                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
                 }`
               }
@@ -53,7 +53,7 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
           ))}
         </nav>
 
-        <div className="border-t border-gray-200 px-5 py-4 dark:border-gray-800">
+        <div className="border-t border-line px-5 py-4 dark:border-line-dark">
           <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
             {user?.collectorName}
           </p>
@@ -65,7 +65,7 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/80 safe-top md:hidden">
+        <header className="sticky top-0 z-10 border-b border-primary-700/50 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white shadow-md dark:from-primary-700 dark:via-primary-800 dark:to-primary-900 safe-top md:hidden">
           <div className="flex h-14 items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <img
@@ -73,9 +73,14 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
                 alt="Logo"
                 className="h-10 w-10 rounded-lg object-cover"
               />
-              <span className="font-semibold text-gray-900 dark:text-white">अष्टविनायक युवक मंडळ</span>
+              <span className="font-semibold text-white">अष्टविनायक युवक मंडळ</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={logout}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/90 hover:bg-white/10 hover:text-white"
+              onClick={logout}
+            >
               Logout
             </Button>
           </div>
@@ -88,8 +93,8 @@ export function SidebarLayout({ items, roleLabel }: SidebarLayoutProps) {
                 className={({ isActive }) =>
                   `flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
+                      ? 'bg-white/20 text-white'
+                      : 'text-primary-50 hover:bg-white/10 hover:text-white'
                   }`
                 }
               >

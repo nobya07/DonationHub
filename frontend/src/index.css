@@ -9,6 +9,18 @@
     box-sizing: border-box;
   }
 
+  html {
+    overscroll-behavior: none;
+    background-color: #fafaf8;
+    color: #212121;
+  }
+
+  html.dark {
+    background-color: #121212;
+    color-scheme: dark;
+    color: #ffffff;
+  }
+
   body {
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -19,19 +31,43 @@
     -webkit-user-select: none;
   }
 
-  html {
-    overscroll-behavior: none;
-  }
-
-  html.dark {
-    color-scheme: dark;
-  }
-
   input,
   textarea,
   select {
     user-select: text;
     -webkit-user-select: text;
+  }
+
+  /* Smooth 250ms fade when the theme switches. The class is added by the
+     ThemeProvider just before toggling dark mode and removed afterwards. */
+  html.theme-transitioning,
+  html.theme-transitioning body,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition:
+      background-color 250ms ease,
+      border-color 250ms ease,
+      color 250ms ease,
+      fill 250ms ease,
+      stroke 250ms ease,
+      box-shadow 250ms ease !important;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px white inset;
+    -webkit-text-fill-color: #111827;
+    caret-color: #111827;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px #1e1e1e inset;
+    -webkit-text-fill-color: #ffffff;
+    caret-color: #ffffff;
   }
 
   .safe-top {
@@ -40,13 +76,6 @@
 
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 30px white inset;
-    -webkit-text-fill-color: #111827;
   }
 }
 
@@ -64,5 +93,13 @@
       0 2px 4px -2px rgb(0 0 0 / 0.06),
       0 0 0 1px rgb(0 0 0 / 0.02);
     transition: box-shadow 0.2s ease;
+  }
+
+  /* Lift cards gently in dark mode with a subtle elevation edge. */
+  .dark .card-shadow {
+    box-shadow:
+      0 1px 3px 0 rgb(0 0 0 / 0.5),
+      0 1px 2px -1px rgb(0 0 0 / 0.6),
+      0 0 0 1px rgb(255 255 255 / 0.03);
   }
 }

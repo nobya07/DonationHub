@@ -159,7 +159,7 @@ export function PrinterSettings() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Printer Settings</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage the Bluetooth receipt printer for this device.
           </p>
         </div>
@@ -171,7 +171,7 @@ export function PrinterSettings() {
       <Card padding="lg" className="mb-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-700">Printer Status</h3>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Printer Status</h3>
             {printing && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700">
                 <svg
@@ -201,9 +201,9 @@ export function PrinterSettings() {
             )}
           </div>
 
-          <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 text-sm space-y-2">
+          <div className="rounded-xl bg-gray-50 p-4 text-sm space-y-2 dark:bg-surface-raised">
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Printer</span>
+              <span className="text-gray-500 dark:text-gray-400">Printer</span>
               <span className="font-semibold text-gray-900 dark:text-white">
                 {status
                   ? (status.deviceName ?? 'Not configured')
@@ -211,18 +211,18 @@ export function PrinterSettings() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">MAC Address</span>
+              <span className="text-gray-500 dark:text-gray-400">MAC Address</span>
               <span className="font-mono text-gray-900 dark:text-white">
                 {status?.address ?? '—'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Status</span>
+              <span className="text-gray-500 dark:text-gray-400">Status</span>
               <span
                 className={
                   status?.connected
-                    ? 'font-medium text-green-600'
-                    : 'font-medium text-red-600'
+                    ? 'font-medium text-success-600 dark:text-success-400'
+                    : 'font-medium text-red-600 dark:text-red-400'
                 }
               >
                 {status
@@ -235,7 +235,7 @@ export function PrinterSettings() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Last Print</span>
+              <span className="text-gray-500 dark:text-gray-400">Last Print</span>
               <span className="text-gray-900 dark:text-white">
                 {status?.lastPrintTime
                   ? formatTimestampMs(status.lastPrintTime)
@@ -243,7 +243,7 @@ export function PrinterSettings() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Pending Queue</span>
+              <span className="text-gray-500 dark:text-gray-400">Pending Queue</span>
               <span className="text-gray-900 dark:text-white">
                 {status && (status.pending ?? 0) > 0
                   ? `${status.pending} job${(status.pending ?? 0) > 1 ? 's' : ''}`
@@ -253,12 +253,12 @@ export function PrinterSettings() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
               {error}
             </p>
           )}
 
-          {message && <p className="text-sm text-green-600">{message}</p>}
+          {message && <p className="text-sm text-success-600 dark:text-success-400">{message}</p>}
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Button
@@ -295,7 +295,7 @@ export function PrinterSettings() {
       {showDevices && (
         <Card padding="lg">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Choose a paired printer
             </h3>
             <Button
@@ -307,7 +307,7 @@ export function PrinterSettings() {
             </Button>
           </div>
           {devices.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               No paired printers found. Pair your printer in Android Bluetooth
               settings first.
             </p>
@@ -322,7 +322,7 @@ export function PrinterSettings() {
                     <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                       {device.name}
                     </p>
-                    <p className="font-mono text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
                       {device.address}
                     </p>
                   </div>

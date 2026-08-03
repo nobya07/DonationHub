@@ -12,9 +12,9 @@ import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 const APP_VERSION = '1.0.0';
 
 const THEME_OPTIONS: { value: ThemePreference; label: string; hint: string }[] = [
-  { value: 'light', label: 'Light Mode', hint: 'Always use the light theme' },
-  { value: 'dark', label: 'Dark Mode', hint: 'Always use the dark theme' },
-  { value: 'system', label: 'System Theme', hint: 'Follow your device setting' },
+  { value: 'light', label: 'Light', hint: 'Always use the light theme' },
+  { value: 'dark', label: 'Dark', hint: 'Always use the dark theme' },
+  { value: 'system', label: 'System Default', hint: 'Follow your device setting' },
 ];
 
 export function Settings() {
@@ -71,8 +71,8 @@ export function Settings() {
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3 text-left transition-colors ${
-        onClick ? 'cursor-pointer hover:bg-gray-100' : 'cursor-default'
+      className={`flex w-full items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3 text-left transition-colors dark:bg-surface-raised ${
+        onClick ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800' : 'cursor-default'
       }`}
     >
       <span className="text-sm text-gray-500">{label}</span>
@@ -111,7 +111,7 @@ export function Settings() {
                 className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
                   active
                     ? 'border-primary-600 bg-primary-50 dark:bg-primary-950'
-                    : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-gray-600'
+                    : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-600 dark:bg-surface-raised dark:hover:border-gray-500'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -180,7 +180,7 @@ export function Settings() {
             () => void handleCheckUpdate(),
           )}
         </div>
-        <details className="mt-4 rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-800">
+        <details className="mt-4 rounded-xl bg-gray-50 px-4 py-3 dark:bg-surface-raised">
           <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
             Release Notes
           </summary>

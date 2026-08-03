@@ -125,7 +125,7 @@ export function Donation() {
         purpose: success.purpose,
         remarks: success.remarks,
         collectorName: success.collectorName,
-        date: success.date,
+        date: success.timestamp,
       });
       if (result.success) {
         setPrintState({ phase: 'success' });
@@ -297,8 +297,8 @@ export function Donation() {
         <div className="mx-auto max-w-lg">
           <Card padding="lg">
           <div className="space-y-6 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-100 dark:bg-success-950">
+              <svg className="h-8 w-8 text-success-600 dark:text-success-300" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
@@ -307,32 +307,32 @@ export function Donation() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Donation Saved
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Receipt has been generated successfully.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Receipt has been generated successfully.</p>
             </div>
 
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 text-left text-sm space-y-2">
+            <div className="rounded-xl bg-gray-50 p-4 text-left text-sm space-y-2 dark:bg-surface-raised">
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Receipt No</span>
+                <span className="text-gray-500 dark:text-gray-400">Receipt No</span>
                 <span className="font-mono font-semibold text-gray-900 dark:text-white">{success.receiptNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Collector</span>
+                <span className="text-gray-500 dark:text-gray-400">Collector</span>
                 <span className="text-gray-900 dark:text-white">{success.collectorName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Donor</span>
+                <span className="text-gray-500 dark:text-gray-400">Donor</span>
                 <span className="text-gray-900 dark:text-white">{success.donorName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Amount</span>
+                <span className="text-gray-500 dark:text-gray-400">Amount</span>
                 <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(Number(success.amount))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Payment</span>
+                <span className="text-gray-500 dark:text-gray-400">Payment</span>
                 <span className="text-gray-900 dark:text-white">{success.paymentMode}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Date</span>
+                <span className="text-gray-500 dark:text-gray-400">Date</span>
                 <span className="text-gray-900 dark:text-white">{success.date}</span>
               </div>
             </div>
@@ -340,7 +340,7 @@ export function Donation() {
             <div className="border-t-2 border-dashed border-gray-200 dark:border-gray-700" />
 
             {success.offline && (
-              <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                 Saved offline. It will be uploaded to Google Sheets
                 automatically when you are back online.
               </p>
@@ -350,7 +350,7 @@ export function Donation() {
               {isNative && (
                 <>
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="lg"
                     className="w-full"
                     loading={printing}
@@ -371,20 +371,20 @@ export function Donation() {
                   )}
 
                   {printState.phase === 'success' && (
-                    <p className="text-sm font-medium text-green-600">
+                    <p className="text-sm font-medium text-success-600 dark:text-success-400">
                       Print Complete ✓
                     </p>
                   )}
 
                   {printState.phase === 'offline' && (
-                    <div className="rounded-lg bg-red-50 px-4 py-3 text-left text-sm text-red-700 space-y-2">
+                    <div className="rounded-lg bg-red-50 px-4 py-3 text-left text-sm text-red-700 space-y-2 dark:bg-red-950 dark:text-red-300">
                       <p className="font-medium">Printer Offline</p>
                       <div className="flex gap-2">
                         <Button size="sm" onClick={handlePrint}>
                           Retry
                         </Button>
                         <Button
-                          variant="secondary"
+                          variant="outline"
                           size="sm"
                           onClick={openPicker}
                         >
@@ -413,7 +413,7 @@ export function Donation() {
                           {pickerError}
                         </p>
                       ) : devices.length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           No paired printers found. Pair your printer in Android
                           Bluetooth settings first.
                         </p>
@@ -428,7 +428,7 @@ export function Donation() {
                                 <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                                   {device.name}
                                 </p>
-                                <p className="font-mono text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                                <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
                                   {device.address}
                                 </p>
                               </div>
@@ -452,7 +452,7 @@ export function Donation() {
               )}
 
               <Button
-                variant="secondary"
+                variant="success"
                 size="lg"
                 className="w-full"
                 loading={whatsapp.phase === 'sharing'}
@@ -465,13 +465,13 @@ export function Donation() {
               </Button>
 
               {whatsapp.phase === 'done' && (
-                <p className="text-sm text-green-600">
+                <p className="text-sm text-success-600 dark:text-success-400">
                   WhatsApp opened — the receipt is pre-filled. Just press Send.
                 </p>
               )}
 
               {whatsapp.phase === 'error' && (
-                <div className="rounded-lg bg-red-50 px-4 py-3 text-left text-sm text-red-700 space-y-2">
+                <div className="rounded-lg bg-red-50 px-4 py-3 text-left text-sm text-red-700 space-y-2 dark:bg-red-950 dark:text-red-300">
                   <p>
                     {whatsapp.error}. Your donation is already saved.
                   </p>
@@ -494,13 +494,13 @@ export function Donation() {
 
             {isNative && (
               <div className="flex items-center justify-center gap-2 pt-1">
-                <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Printer status:</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Printer status:</span>
                 {printerStatus ? (
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
                       printerStatus.connected
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-success-100 text-success-700 dark:bg-success-950 dark:text-success-300'
+                        : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
                     }`}
                   >
                     {printerStatus.connected
@@ -508,7 +508,7 @@ export function Donation() {
                       : '🔴 Disconnected'}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-sm font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                     ⚪ Checking…
                   </span>
                 )}
@@ -611,7 +611,7 @@ export function Donation() {
       <Card padding="lg">
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Record a Donation</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Fill in the donation details below.
           </p>
         </div>
@@ -628,7 +628,7 @@ export function Donation() {
             label="Collector Name"
             value={user?.collectorName ?? ''}
             readOnly
-            className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 dark:text-gray-500 cursor-not-allowed"
+            className="bg-gray-50 dark:bg-surface-raised text-gray-500 dark:text-gray-400 cursor-not-allowed"
             tabIndex={-1}
           />
 
@@ -696,6 +696,7 @@ export function Donation() {
           <div className="flex gap-3 pt-2">
             <Button
               type="submit"
+              variant="success"
               loading={isSubmitting}
               size="lg"
               className="flex-1"
@@ -704,7 +705,7 @@ export function Donation() {
             </Button>
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="lg"
               onClick={() => {
                 setServerError(null);
@@ -734,7 +735,7 @@ export function Donation() {
               Keep Editing
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               className="flex-1"
               onClick={() => {
                 setShowDiscardDialog(false);

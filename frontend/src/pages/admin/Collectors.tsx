@@ -103,8 +103,8 @@ export function Collectors() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Collectors</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Collectors</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage collector accounts and permissions.
           </p>
         </div>
@@ -114,7 +114,7 @@ export function Collectors() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300" role="alert">
           {error}
         </div>
       )}
@@ -123,7 +123,7 @@ export function Collectors() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-line text-xs uppercase tracking-wide text-gray-500 dark:border-line-dark dark:text-gray-400">
                 <th className="px-3 py-2 font-medium">Collector ID</th>
                 <th className="px-3 py-2 font-medium">Name</th>
                 <th className="px-3 py-2 font-medium">Username</th>
@@ -135,16 +135,16 @@ export function Collectors() {
             <tbody>
               {collectors.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-gray-500">
+                  <td colSpan={6} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400">
                     No collectors found.
                   </td>
                 </tr>
               )}
               {collectors.map((collector) => (
-                <tr key={collector.collectorId} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                  <td className="px-3 py-2.5 font-mono text-xs text-gray-600">{collector.collectorId}</td>
-                  <td className="px-3 py-2.5 font-medium text-gray-900">{collector.collectorName}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{collector.username}</td>
+                <tr key={collector.collectorId} className="border-b border-line last:border-0 hover:bg-gray-50 dark:border-line-dark dark:hover:bg-surface-raised">
+                  <td className="px-3 py-2.5 font-mono text-xs text-gray-600 dark:text-gray-300">{collector.collectorId}</td>
+                  <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{collector.collectorName}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{collector.username}</td>
                   <td className="px-3 py-2.5">
                     <Badge tone={collector.role === 'Admin' ? 'blue' : 'gray'}>
                       {collector.role}
@@ -180,9 +180,9 @@ export function Collectors() {
                         Reset Password
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="danger"
                         size="sm"
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        className="dark:text-red-300"
                         disabled={busy}
                         onClick={() => handleDelete(collector)}
                       >
@@ -283,7 +283,7 @@ function CollectorModal({ mode, collector, onClose, onSaved }: CollectorModalPro
     <Modal title={mode === 'create' ? 'Add Collector' : 'Edit Collector'} onClose={onClose}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {submitError && (
-          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300" role="alert">
             {submitError}
           </div>
         )}
@@ -321,20 +321,20 @@ function CollectorModal({ mode, collector, onClose, onSaved }: CollectorModalPro
           {...register('role')}
         />
 
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-surface-raised"
             {...register('active')}
           />
           Active
         </label>
 
         <div className="flex gap-3 pt-2">
-          <Button type="submit" loading={isSubmitting} className="flex-1">
+          <Button type="submit" variant="success" loading={isSubmitting} className="flex-1">
             {mode === 'create' ? 'Add Collector' : 'Save Changes'}
           </Button>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
         </div>
@@ -383,7 +383,7 @@ function ResetPasswordModal({ collector, onClose, onSaved }: ResetPasswordModalP
     <Modal title={`Reset Password — ${collector.collectorName}`} onClose={onClose}>
       <div className="space-y-4">
         {submitError && (
-          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300" role="alert">
             {submitError}
           </div>
         )}
@@ -407,10 +407,10 @@ function ResetPasswordModal({ collector, onClose, onSaved }: ResetPasswordModalP
         />
 
         <div className="flex gap-3 pt-2">
-          <Button loading={busy} className="flex-1" onClick={submit}>
+          <Button variant="success" loading={busy} className="flex-1" onClick={submit}>
             Reset Password
           </Button>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
         </div>

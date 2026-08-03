@@ -131,8 +131,8 @@ export function Reports() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Reports</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Reports</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Summarize donations over a period.
           </p>
         </div>
@@ -140,7 +140,7 @@ export function Reports() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300" role="alert">
           {error}
         </div>
       )}
@@ -180,11 +180,11 @@ export function Reports() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card padding="md">
-          <h3 className="mb-3 text-base font-semibold text-gray-900">Monthly Collection</h3>
+          <h3 className="mb-3 text-base font-semibold text-gray-900 dark:text-white">Monthly Collection</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                <tr className="border-b border-line text-xs uppercase tracking-wide text-gray-500 dark:border-line-dark dark:text-gray-400">
                   <th className="px-3 py-2 font-medium">Month</th>
                   <th className="px-3 py-2 font-medium">Donations</th>
                   <th className="px-3 py-2 text-right font-medium">Amount</th>
@@ -193,16 +193,16 @@ export function Reports() {
               <tbody>
                 {report.monthly.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-3 py-6 text-center text-gray-500">
+                    <td colSpan={3} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                       No donations in this period.
                     </td>
                   </tr>
                 )}
                 {report.monthly.map((m) => (
-                  <tr key={m.key} className="border-b border-gray-100 last:border-0">
-                    <td className="px-3 py-2.5 font-medium text-gray-900">{formatMonth(m.key)}</td>
-                    <td className="px-3 py-2.5 text-gray-600">{m.count}</td>
-                    <td className="px-3 py-2.5 text-right font-semibold text-gray-900">{formatCurrency(m.amount)}</td>
+                  <tr key={m.key} className="border-b border-line last:border-0 dark:border-line-dark">
+                    <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{formatMonth(m.key)}</td>
+                    <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{m.count}</td>
+                    <td className="px-3 py-2.5 text-right font-semibold text-gray-900 dark:text-white">{formatCurrency(m.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -211,11 +211,11 @@ export function Reports() {
         </Card>
 
         <Card padding="md">
-          <h3 className="mb-3 text-base font-semibold text-gray-900">By Collector</h3>
+          <h3 className="mb-3 text-base font-semibold text-gray-900 dark:text-white">By Collector</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                <tr className="border-b border-line text-xs uppercase tracking-wide text-gray-500 dark:border-line-dark dark:text-gray-400">
                   <th className="px-3 py-2 font-medium">Collector</th>
                   <th className="px-3 py-2 font-medium">Donations</th>
                   <th className="px-3 py-2 text-right font-medium">Amount</th>
@@ -224,16 +224,16 @@ export function Reports() {
               <tbody>
                 {report.byCollector.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-3 py-6 text-center text-gray-500">
+                    <td colSpan={3} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                       No donations in this period.
                     </td>
                   </tr>
                 )}
                 {report.byCollector.map((c) => (
-                  <tr key={c.name} className="border-b border-gray-100 last:border-0">
-                    <td className="px-3 py-2.5 font-medium text-gray-900">{c.name}</td>
-                    <td className="px-3 py-2.5 text-gray-600">{c.count}</td>
-                    <td className="px-3 py-2.5 text-right font-semibold text-gray-900">{formatCurrency(c.amount)}</td>
+                  <tr key={c.name} className="border-b border-line last:border-0 dark:border-line-dark">
+                    <td className="px-3 py-2.5 font-medium text-gray-900 dark:text-white">{c.name}</td>
+                    <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{c.count}</td>
+                    <td className="px-3 py-2.5 text-right font-semibold text-gray-900 dark:text-white">{formatCurrency(c.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -243,11 +243,11 @@ export function Reports() {
       </div>
 
       <Card padding="md">
-        <h3 className="mb-3 text-base font-semibold text-gray-900">By Payment Mode</h3>
+        <h3 className="mb-3 text-base font-semibold text-gray-900 dark:text-white">By Payment Mode</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-line text-xs uppercase tracking-wide text-gray-500 dark:border-line-dark dark:text-gray-400">
                 <th className="px-3 py-2 font-medium">Payment Mode</th>
                 <th className="px-3 py-2 font-medium">Donations</th>
                 <th className="px-3 py-2 text-right font-medium">Amount</th>
@@ -256,16 +256,16 @@ export function Reports() {
             <tbody>
               {report.byMode.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-3 py-6 text-center text-gray-500">
+                  <td colSpan={3} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                     No donations in this period.
                   </td>
                 </tr>
               )}
               {report.byMode.map((m) => (
-                <tr key={m.mode} className="border-b border-gray-100 last:border-0">
-                  <td className="px-3 py-2.5 font-medium capitalize text-gray-900">{m.mode}</td>
-                  <td className="px-3 py-2.5 text-gray-600">{m.count}</td>
-                  <td className="px-3 py-2.5 text-right font-semibold text-gray-900">{formatCurrency(m.amount)}</td>
+                <tr key={m.mode} className="border-b border-line last:border-0 dark:border-line-dark">
+                  <td className="px-3 py-2.5 font-medium capitalize text-gray-900 dark:text-white">{m.mode}</td>
+                  <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{m.count}</td>
+                  <td className="px-3 py-2.5 text-right font-semibold text-gray-900 dark:text-white">{formatCurrency(m.amount)}</td>
                 </tr>
               ))}
             </tbody>
