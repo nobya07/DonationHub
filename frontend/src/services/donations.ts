@@ -5,6 +5,7 @@ import type {
   DonationRecord,
 } from '../types';
 import { API_BASE_URL } from './api';
+import { notifySessionInvalidated, isSessionReplacedCode } from './session';
 
 interface RawDonation {
   timestamp: string;
@@ -32,9 +33,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
+      const code = error.response.data?.code as string | undefined;
       const message =
         error.response.data?.message || 'An unexpected error occurred';
-      return Promise.reject(new Error(message));
+
+      if (isSessionReplacedCode(code)) {
+        notifySessionInvalidated();
+      }
+
+      const apiError = new Error(message);
+      (apiError as Error & { code?: string }).code = code;
+      return Promise.reject(apiError);
     }
     if (error.request) {
       const networkError = new Error(

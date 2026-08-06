@@ -247,7 +247,7 @@ export default async function handler(
   if (sendCorsPreflight(req, res)) return;
   applyCorsHeaders(req, res);
 
-  const session = requireAdmin(req, res);
+  const session = await requireAdmin(req, res);
 
   if (!session) return;
 

@@ -166,7 +166,7 @@ export default async function handler(
     }
   }
 
-  const session = requireAuth(req, res);
+  const session = await requireAuth(req, res);
   if (!session) return;
 
   if (req.method === 'POST' && action === 'send-receipt') {

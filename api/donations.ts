@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (sendCorsPreflight(req, res)) return;
   applyCorsHeaders(req, res);
 
-  const session = requireAuth(req, res);
+  const session = await requireAuth(req, res);
 
   if (!session) return;
 

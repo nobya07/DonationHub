@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'node:crypto';
 import { serialize, parse } from 'cookie';
 
 function getSecret(): string {
@@ -18,6 +19,13 @@ export interface SessionPayload {
   username: string;
   collectorName: string;
   role: 'Admin' | 'Collector';
+  /** Active single-device login session id; must match the stored DB value. */
+  sessionId: string;
+}
+
+/** Generates a unique session id used for single-device login. */
+export function createSessionId(): string {
+  return randomUUID();
 }
 
 export function createSessionToken(payload: SessionPayload): string {

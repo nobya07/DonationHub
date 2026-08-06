@@ -4,7 +4,7 @@ import { formatCurrency, formatISTReceiptDate } from './format';
 /**
  * THE single receipt template. Every receipt output (WhatsApp message,
  * Bluetooth thermal printer, PDF, Receipt Details page) is generated from
- * `buildReceiptLines` so all four stay identical.
+ * `buildReceiptLines` so all of them stay identical.
  */
 export interface ReceiptInput {
   receiptNo: string;
@@ -53,17 +53,22 @@ export function buildReceiptLines(input: ReceiptInput): ReceiptLine[] {
   const purpose = input.purpose.trim() || '-';
 
   return [
-    { align: 'center', segments: [{ text: '|| श्री गजानन प्रसन्न ||' }] },
+    { segments: [{ text: '|| श्री गजानन प्रसन्न ||' }] },
     { segments: [{ text: '' }] },
-    {
-      align: 'center',
-      segments: [{ text: 'श्री अष्टविनायक गणेश उत्सव मंडळ', bold: true }],
-    },
-    { align: 'center', segments: [{ text: 'अष्टविनायक नगर, येळूर रोड,' }] },
-    { align: 'center', segments: [{ text: 'वडगाव, बेळगाव.' }] },
+    { segments: [{ text: '/वडगावचा अष्टविनायक/' }] },
+    { segments: [{ text: '' }] },
+    { segments: [{ text: 'श्री सार्वजनिक गणेश उत्सव मंडळ', bold: true }] },
+    { segments: [{ text: 'अष्टविनायक नगर, येळूर रोड,' }] },
+    { segments: [{ text: 'वडगाव, बेळगाव.' }] },
     { segments: [{ text: '' }] },
     { segments: [{ text: 'पावती नं.: ' }, { text: input.receiptNo, bold: true }] },
-    { segments: [{ text: input.donorName, bold: true }, { text: ',' }] },
+    {
+      segments: [
+        { text: 'श्री. रा. रा ' },
+        { text: input.donorName, bold: true },
+        { text: ' ,' },
+      ],
+    },
     { segments: [{ text: 'यांच्याकडून' }] },
     {
       segments: [
@@ -90,7 +95,6 @@ export function buildReceiptLines(input: ReceiptInput): ReceiptLine[] {
         },
       ],
     },
-    { segments: [{ text: '' }] },
     { segments: [{ text: 'धन्यवाद.' }] },
     { segments: [{ text: '' }] },
     { segments: [{ text: 'अष्टविनायक युवक मंडळ', bold: true }] },

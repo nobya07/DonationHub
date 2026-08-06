@@ -1,5 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { verifySessionToken, getTokenFromCookies } from './utils/session.js';
+import {
+  authenticate,
+  SESSION_REPLACED_CODE,
+  SESSION_REPLACED_MESSAGE,
+} from './utils/guard.js';
 import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -11,23 +15,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const token = getTokenFromCookies(req.headers.cookie);
+    const result = await authenticate(req);
 
-    if (!token) {
+    if (!('session' in result)) {
+      if (result.reason === 'session-replaced') {
+        return res.status(401).json({
+          code: SESSION_REPLACED_CODE,
+          message: SESSION_REPLACED_MESSAGE,
+        });
+      }
+
       return res.status(401).json({ message: 'Not authenticated' });
     }
 
-    const payload = verifySessionToken(token);
-
-    if (!payload) {
-      return res.status(401).json({ message: 'Invalid or expired session' });
-    }
-
     return res.status(200).json({
-      collectorId: payload.collectorId,
-      collectorName: payload.collectorName,
-      username: payload.username,
-      role: payload.role === 'Admin' ? 'Admin' : 'Collector',
+      collectorId: result.session.collectorId,
+      collectorName: result.session.collectorName,
+      username: result.session.username,
+      role: result.session.role === 'Admin' ? 'Admin' : 'Collector',
+      sessionId: result.session.sessionId,
     });
   } catch (error) {
     console.error('Verify error:', error);

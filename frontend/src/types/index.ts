@@ -18,6 +18,8 @@ export interface LoginResponse {
   collectorName: string;
   username: string;
   role: UserRole;
+  /** Active single-device login session id; saved on the device. */
+  sessionId: string;
 }
 
 export interface VerifyResponse {
@@ -25,6 +27,8 @@ export interface VerifyResponse {
   collectorName: string;
   username: string;
   role: UserRole;
+  /** Active single-device login session id; saved on the device. */
+  sessionId: string;
 }
 
 export interface ApiError {

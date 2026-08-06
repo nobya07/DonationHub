@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getCollector } from "./utils/sheets.js";
+import { getCollector, setCollectorSessionId } from "./utils/sheets.js";
 import {
+  createSessionId,
   createSessionToken,
   createSessionCookie,
 } from "./utils/session.js";
@@ -51,11 +52,18 @@ export default async function handler(
       });
     }
 
+    // New session id replaces any previous login on other devices, making
+    // the old device's session invalid immediately.
+    const sessionId = createSessionId();
+
+    await setCollectorSessionId(collector.collectorId, sessionId);
+
     const token = createSessionToken({
       collectorId: collector.collectorId,
       username: collector.username,
       collectorName: collector.collectorName,
       role: collector.role,
+      sessionId,
     });
 
     res.setHeader("Set-Cookie", createSessionCookie(token, isCrossOriginRequest(req)));
@@ -65,6 +73,7 @@ export default async function handler(
       username: collector.username,
       collectorName: collector.collectorName,
       role: collector.role,
+      sessionId,
     });
   } catch (error) {
     console.error(error);

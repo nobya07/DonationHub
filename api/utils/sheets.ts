@@ -56,6 +56,8 @@ export interface Collector {
   collectorName: string;
   role: UserRole;
   active: boolean;
+  /** Active single-device login session id (empty when not logged in). */
+  sessionId: string;
 }
 
 export interface NewCollectorInput {
@@ -71,6 +73,7 @@ export interface CollectorUpdates {
   collectorName?: string;
   role?: UserRole;
   active?: boolean;
+  sessionId?: string;
 }
 
 function getSpreadsheetId(): string {
@@ -85,7 +88,7 @@ function getSpreadsheetId(): string {
   return id;
 }
 
-const COLLECTORS_RANGE = 'Collectors!A:F';
+const COLLECTORS_RANGE = 'Collectors!A:G';
 const DONATIONS_RANGE = 'Donations!A:K';
 
 function toRole(value: string | undefined): UserRole {
@@ -111,6 +114,7 @@ function parseCollectorRow(row: string[] | undefined): Collector | null {
     collectorName: row[3]?.trim() ?? '',
     role: toRole(row[4]),
     active: toActive(row[5]),
+    sessionId: row[6]?.trim() ?? '',
   };
 }
 
@@ -212,6 +216,7 @@ export async function addCollector(
         input.collectorName.trim(),
         input.role,
         input.active ? 'TRUE' : 'FALSE',
+        '',
       ]],
     },
   });
@@ -223,6 +228,7 @@ export async function addCollector(
     collectorName: input.collectorName.trim(),
     role: input.role,
     active: input.active,
+    sessionId: '',
   };
 }
 
@@ -271,11 +277,12 @@ export async function updateCollector(
     collectorName: (updates.collectorName ?? current.collectorName).trim(),
     role: updates.role ?? current.role,
     active: updates.active ?? current.active,
+    sessionId: updates.sessionId ?? current.sessionId,
   };
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: getSpreadsheetId(),
-    range: `Collectors!A${targetIndex + 1}:F${targetIndex + 1}`,
+    range: `Collectors!A${targetIndex + 1}:G${targetIndex + 1}`,
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [[
@@ -285,6 +292,7 @@ export async function updateCollector(
         next.collectorName,
         next.role,
         next.active ? 'TRUE' : 'FALSE',
+        next.sessionId,
       ]],
     },
   });
@@ -323,7 +331,7 @@ export async function deleteCollectorRow(
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: getSpreadsheetId(),
-    range: `Collectors!A1:F${filtered.length}`,
+    range: `Collectors!A1:G${filtered.length}`,
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: filtered,
@@ -333,7 +341,7 @@ export async function deleteCollectorRow(
   if (rows.length > filtered.length) {
     await sheets.spreadsheets.values.clear({
       spreadsheetId: getSpreadsheetId(),
-      range: `Collectors!A${filtered.length + 1}:F${rows.length}`,
+      range: `Collectors!A${filtered.length + 1}:G${rows.length}`,
     });
   }
 }
@@ -372,6 +380,37 @@ export async function resetCollectorPassword(
       values: [[newPassword]],
     },
   });
+}
+
+/** Replaces the stored active session id for a collector (single login). */
+export async function setCollectorSessionId(
+  collectorId: string,
+  sessionId: string
+): Promise<void> {
+  const sheets = getSheets();
+
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: getSpreadsheetId(),
+    range: COLLECTORS_RANGE,
+  });
+
+  const rows = response.data.values ?? [];
+
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i]?.[0] ?? '').trim() === collectorId) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: getSpreadsheetId(),
+        range: `Collectors!G${i + 1}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: {
+          values: [[sessionId]],
+        },
+      });
+      return;
+    }
+  }
+
+  throw new Error('Collector not found');
 }
 
 export interface DonationRecord {
