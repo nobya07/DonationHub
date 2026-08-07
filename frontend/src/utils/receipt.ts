@@ -55,7 +55,7 @@ export function buildReceiptLines(input: ReceiptInput): ReceiptLine[] {
   return [
     { segments: [{ text: '|| श्री गजानन प्रसन्न ||' }] },
     { segments: [{ text: '' }] },
-    { segments: [{ text: '/वडगावचा अष्टविनायक/' }] },
+    { align: 'center', segments: [{ text: 'वडगावचा अष्टविनायक' }] },
     { segments: [{ text: '' }] },
     { segments: [{ text: 'श्री सार्वजनिक गणेश उत्सव मंडळ', bold: true }] },
     { segments: [{ text: 'अष्टविनायक नगर, येळूर रोड,' }] },

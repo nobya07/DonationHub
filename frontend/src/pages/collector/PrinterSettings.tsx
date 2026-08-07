@@ -16,7 +16,7 @@ import {
 } from '../../services/printer';
 import { formatTimestampMs } from '../../utils/format';
 
-type BusyAction = 'test' | 'connect' | 'forget' | 'reconnect' | null;
+type BusyAction = 'test' | 'forget' | 'reconnect' | null;
 
 export function PrinterSettings() {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export function PrinterSettings() {
   const [devices, setDevices] = useState<PrinterDevice[]>([]);
   const [showDevices, setShowDevices] = useState(false);
   const [busy, setBusy] = useState<BusyAction>(null);
+  const [connectingPrinter, setConnectingPrinter] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,7 +67,7 @@ export function PrinterSettings() {
   };
 
   const handleConnect = async (macAddress: string) => {
-    setBusy('connect');
+    setConnectingPrinter(macAddress);
     setError(null);
     setMessage(null);
     try {
@@ -80,7 +81,7 @@ export function PrinterSettings() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connection failed');
     } finally {
-      setBusy(null);
+      setConnectingPrinter(null);
     }
     await refreshStatus();
   };
@@ -301,6 +302,7 @@ export function PrinterSettings() {
             <Button
               variant="ghost"
               size="sm"
+              disabled={connectingPrinter !== null}
               onClick={() => setShowDevices(false)}
             >
               Cancel
@@ -328,7 +330,11 @@ export function PrinterSettings() {
                   </div>
                   <Button
                     size="sm"
-                    loading={busy === 'connect'}
+                    loading={connectingPrinter === device.address}
+                    disabled={
+                      connectingPrinter !== null &&
+                      connectingPrinter !== device.address
+                    }
                     onClick={() => handleConnect(device.address)}
                   >
                     Connect
