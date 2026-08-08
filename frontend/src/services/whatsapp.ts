@@ -67,7 +67,7 @@ export function buildReceiptMessage(input: WhatsAppReceiptPayload): string {
 
   if (!input.token) return receipt;
 
-  return `${receipt}\n\nView Receipt:\n${API_ORIGIN}/receipt/${input.token}`;
+  return `${receipt}\n\nView Receipt:\n${API_ORIGIN}/api/receipt/${input.token}`;
 }
 
 /**
