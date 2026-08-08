@@ -3,5 +3,5 @@
      (no stretch, no crop, transparent areas preserved). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/splash_background" />
-    <item android:drawable="@drawable/splash_icon" />
+    <item android:drawable="@drawable/splash_logo_centered" />
 </layer-list>

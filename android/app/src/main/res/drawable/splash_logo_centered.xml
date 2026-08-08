@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Round app logo rendered inside transparent padding.
+
+    The source logo fills its whole canvas, so it is drawn scaled into the
+    central ~60% of this drawable. Android 12+ masks the splash icon with a
+    circle of 2/3 of the icon envelope, so the complete round logo always
+    stays inside the masked safe area and is never cropped. The same drawable
+    is reused by the legacy (<12) splash screen.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:insetLeft="20%"
+        android:insetTop="20%"
+        android:insetRight="20%"
+        android:insetBottom="20%">
+        <bitmap
+            android:src="@drawable/splash_logo"
+            android:gravity="fill" />
+    </item>
+</layer-list>

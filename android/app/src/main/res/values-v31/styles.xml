@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Android 12+ native splash: background with the round app logo centred.
-         The logo is drawn inside ample transparency (splash_icon.xml), so the
-         system's circular splash icon mask cannot crop the outer ring. -->
+         The logo is drawn inside ample transparency (splash_logo_centered.xml),
+         so the system's circular splash icon mask cannot crop the outer ring. -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
         <!-- Transparent icon background: the system must not draw a white or
              coloured icon background behind the already-round transparent logo. -->
         <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_logo_centered</item>
     </style>
 </resources>
