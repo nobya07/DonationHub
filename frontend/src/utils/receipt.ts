@@ -1,5 +1,5 @@
-import { amountInWords } from './amountInWords';
-import { formatCurrency, formatISTReceiptDate } from './format';
+import { amountInWords } from './amountInWords.js';
+import { formatCurrency, formatISTReceiptDate } from './format.js';
 
 /**
  * THE single receipt template. Every receipt output (WhatsApp message,
