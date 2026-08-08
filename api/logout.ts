@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { clearSessionCookie } from './utils/session.js';
+import { clearSessionCookie } from '../server/utils/session.js';
 import {
   applyCorsHeaders,
   isCrossOriginRequest,
   sendCorsPreflight,
-} from './utils/cors.js';
+} from '../server/utils/cors.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (sendCorsPreflight(req, res)) return;

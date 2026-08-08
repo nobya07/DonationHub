@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getAllDonations } from '../utils/sheets.js';
+import { getAllDonations } from '../../server/utils/sheets.js';
 import {
   createReceiptToken,
   isReceiptToken,
-} from '../utils/receiptToken.js';
-import { applyCorsHeaders, sendCorsPreflight } from '../utils/cors.js';
+} from '../../server/utils/receiptToken.js';
+import { applyCorsHeaders, sendCorsPreflight } from '../../server/utils/cors.js';
 
 /**
  * Public receipt lookup: GET /api/receipt/:token

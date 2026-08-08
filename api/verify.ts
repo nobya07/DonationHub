@@ -3,8 +3,8 @@ import {
   authenticate,
   SESSION_REPLACED_CODE,
   SESSION_REPLACED_MESSAGE,
-} from './utils/guard.js';
-import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
+} from '../server/utils/guard.js';
+import { applyCorsHeaders, sendCorsPreflight } from '../server/utils/cors.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (sendCorsPreflight(req, res)) return;

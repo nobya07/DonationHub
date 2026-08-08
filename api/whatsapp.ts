@@ -1,17 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireAuth } from './utils/guard.js';
+import { requireAuth } from '../server/utils/guard.js';
 import {
   buildReceiptMessage,
   getWhatsAppConfig,
   normalizePhone,
   sendTextMessage,
-} from './utils/whatsapp.js';
+} from '../server/utils/whatsapp.js';
 import {
   recordWhatsAppMessage,
   updateWhatsAppMessageStatus,
   getWhatsAppMessageStatus,
-} from './utils/sheets.js';
-import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
+} from '../server/utils/sheets.js';
+import { applyCorsHeaders, sendCorsPreflight } from '../server/utils/cors.js';
 
 interface SendReceiptBody {
   receiptNo?: string;

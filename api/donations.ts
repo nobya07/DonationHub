@@ -3,11 +3,11 @@ import {
   getNextReceiptNumber,
   appendDonation,
   getAllDonations,
-} from './utils/sheets.js';
-import { requireAuth } from './utils/guard.js';
-import { createReceiptToken } from './utils/receiptToken.js';
-import { formatISTTimestamp } from './utils/time.js';
-import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
+} from '../server/utils/sheets.js';
+import { requireAuth } from '../server/utils/guard.js';
+import { createReceiptToken } from '../server/utils/receiptToken.js';
+import { formatISTTimestamp } from '../server/utils/time.js';
+import { applyCorsHeaders, sendCorsPreflight } from '../server/utils/cors.js';
 
 interface DonationBody {
   donorName?: string;

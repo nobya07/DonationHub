@@ -1,15 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getCollector, setCollectorSessionId } from "./utils/sheets.js";
+import { getCollector, setCollectorSessionId } from "../server/utils/sheets.js";
 import {
   createSessionId,
   createSessionToken,
   createSessionCookie,
-} from "./utils/session.js";
+} from "../server/utils/session.js";
 import {
   applyCorsHeaders,
   isCrossOriginRequest,
   sendCorsPreflight,
-} from "./utils/cors.js";
+} from "../server/utils/cors.js";
 
 export default async function handler(
   req: VercelRequest,

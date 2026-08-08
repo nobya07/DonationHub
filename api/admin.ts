@@ -8,10 +8,10 @@ import {
   getAllDonations,
   resetCollectorPassword,
   type Collector,
-} from './utils/sheets.js';
-import { requireAdmin } from './utils/guard.js';
-import { createReceiptToken } from './utils/receiptToken.js';
-import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
+} from '../server/utils/sheets.js';
+import { requireAdmin } from '../server/utils/guard.js';
+import { createReceiptToken } from '../server/utils/receiptToken.js';
+import { applyCorsHeaders, sendCorsPreflight } from '../server/utils/cors.js';
 
 interface CollectorBody {
   username?: string;
