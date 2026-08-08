@@ -106,6 +106,7 @@ export function ReceiptDetails() {
         purpose: donation.purpose,
         collectorName: donation.collectorName,
         date: donationToEpochMs(donation),
+        token: donation.token,
       });
       if (!result.success && result.error) showToast(result.error);
     } finally {

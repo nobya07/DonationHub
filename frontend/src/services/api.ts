@@ -11,3 +11,8 @@ const BACKEND_ORIGIN = 'https://donationhub-gamma.vercel.app';
 export const API_BASE_URL = Capacitor.isNativePlatform()
   ? BACKEND_ORIGIN
   : '';
+
+/** Origin of the deployed website, used to build public receipt links. */
+export const API_ORIGIN = Capacitor.isNativePlatform()
+  ? BACKEND_ORIGIN
+  : window.location.origin;

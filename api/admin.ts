@@ -10,6 +10,7 @@ import {
   type Collector,
 } from './utils/sheets.js';
 import { requireAdmin } from './utils/guard.js';
+import { createReceiptToken } from './utils/receiptToken.js';
 import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
 
 interface CollectorBody {
@@ -83,7 +84,12 @@ async function handleListDonations(req: VercelRequest, res: VercelResponse) {
 
     donations.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
-    return res.status(200).json({ donations });
+    return res.status(200).json({
+      donations: donations.map((d) => ({
+        ...d,
+        token: createReceiptToken(d.receiptNo),
+      })),
+    });
   } catch (error) {
     console.error('Admin donations error:', error);
     return res.status(500).json({ message: 'Failed to load donations' });

@@ -62,6 +62,7 @@ interface SuccessState {
   address: string;
   offline: boolean;
   timestamp: number;
+  token?: string;
 }
 
 interface WhatsAppState {
@@ -236,6 +237,7 @@ export function Donation() {
       purpose: success.purpose,
       collectorName: success.collectorName,
       date: success.timestamp,
+      token: success.token,
     });
 
     if (result.success) {
@@ -574,6 +576,7 @@ export function Donation() {
         address: data.address ?? '',
         offline: false,
         timestamp: Date.now(),
+        token: result.token,
       });
     } catch (err) {
       if (isNetworkError(err)) {

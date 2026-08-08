@@ -26,18 +26,18 @@ export const StatCard = memo(function StatCard({
   return (
     <Card padding="sm" className="h-full">
       <div className="flex h-full flex-col gap-2">
-        <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
-        <div className="flex min-w-0 items-center gap-3">
+        <p className="text-sm font-medium leading-snug text-gray-900 dark:text-gray-100">{label}</p>
+        <div className="flex min-w-0 items-center gap-2">
           {icon && (
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                 accentStyles[accent] ?? accentStyles.primary
               }`}
             >
               {icon}
             </div>
           )}
-          <p className="truncate text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+          <p className="truncate text-xl font-bold sm:text-2xl text-gray-900 dark:text-white">{value}</p>
         </div>
       </div>
     </Card>

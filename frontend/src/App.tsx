@@ -56,6 +56,9 @@ const Settings = lazy(() =>
 const ReceiptDetails = lazy(() =>
   import('./pages/ReceiptDetails').then((m) => ({ default: m.ReceiptDetails })),
 );
+const PublicReceipt = lazy(() =>
+  import('./pages/PublicReceipt').then((m) => ({ default: m.PublicReceipt })),
+);
 
 function PrinterMonitor() {
   const showToast = useToast();
@@ -151,6 +154,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
+          <Route path="/receipt/:token" element={<PublicReceipt />} />
+
           <Route
             path="/admin"
             element={
@@ -181,7 +186,6 @@ export default function App() {
             <Route index element={<CollectorDashboard />} />
             <Route path="donation" element={<Donation />} />
             <Route path="my-donations" element={<MyDonations />} />
-            <Route path="receipt/:receiptNo" element={<ReceiptDetails />} />
             <Route path="printer-settings" element={<PrinterSettings />} />
             <Route path="settings" element={<Settings />} />
           </Route>

@@ -79,14 +79,14 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Today's Collection" value={formatCurrency(stats.todayAmount)} accent="green" />
         <StatCard label="Monthly Collection" value={formatCurrency(stats.monthAmount)} accent="blue" />
         <StatCard label="Total Donations" value={formatCurrency(stats.totalAmount)} accent="primary" />
         <StatCard label="Total Donors" value={String(stats.uniqueDonors)} accent="violet" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 sm:grid-cols-3">
         <StatCard label="Donation Count" value={String(stats.totalCount)} accent="rose" />
         <StatCard label="Today's Count" value={String(stats.todayCount)} accent="amber" />
         <StatCard label="Active Collectors" value={String(collectors.filter((c) => c.active).length)} accent="blue" />

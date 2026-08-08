@@ -19,6 +19,7 @@ interface RawDonation {
   paymentMode: string;
   purpose: string;
   remarks: string;
+  token?: string;
 }
 
 const api = axios.create({

@@ -5,6 +5,7 @@ import {
   getAllDonations,
 } from './utils/sheets.js';
 import { requireAuth } from './utils/guard.js';
+import { createReceiptToken } from './utils/receiptToken.js';
 import { formatISTTimestamp } from './utils/time.js';
 import { applyCorsHeaders, sendCorsPreflight } from './utils/cors.js';
 
@@ -41,7 +42,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       sessionDonations.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
-      return res.status(200).json({ donations: sessionDonations });
+      return res.status(200).json({
+        donations: sessionDonations.map((d) => ({
+          ...d,
+          token: createReceiptToken(d.receiptNo),
+        })),
+      });
     }
 
     if (req.method !== 'POST') {
@@ -80,6 +86,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       receiptNumber: receiptNo,
+      token: createReceiptToken(receiptNo),
     });
   } catch (error) {
     console.error('Donation error:', error);

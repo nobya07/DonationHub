@@ -50,6 +50,8 @@ export interface DonationPayload {
 export interface DonationResponse {
   success: boolean;
   receiptNumber: string;
+  /** Secure token for the public receipt link (/receipt/<token>). */
+  token?: string;
 }
 
 export interface DonationRecord {
@@ -64,6 +66,8 @@ export interface DonationRecord {
   paymentMode: string;
   purpose: string;
   remarks: string;
+  /** Secure token for the public receipt link (/receipt/<token>). */
+  token?: string;
 }
 
 export interface AdminCollector {

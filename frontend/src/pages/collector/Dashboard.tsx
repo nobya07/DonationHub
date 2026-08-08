@@ -26,7 +26,7 @@ const RECENT_DONATIONS_COUNT = 5;
 function StatusPill({ online, label }: { online: boolean; label: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium sm:px-3 sm:text-sm ${
         online
           ? 'bg-success-100 text-success-700 dark:bg-success-950 dark:text-success-300'
           : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
@@ -183,7 +183,7 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label="Today's Collection"
           value={formatCurrency(todayTotal)}
@@ -216,7 +216,7 @@ export function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
         <Card padding="sm" className="h-full">
           <div className="flex h-full flex-col items-start gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Printer Status</span>
@@ -227,7 +227,7 @@ export function Dashboard() {
                   label={printerStatus.connected ? 'Connected' : 'Disconnected'}
                 />
               ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500 sm:px-3 sm:text-sm dark:bg-gray-800 dark:text-gray-400">
                   ⚪ Checking…
                 </span>
               )
