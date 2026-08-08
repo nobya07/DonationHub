@@ -1,5 +1,6 @@
 package com.donationhub.app.bluetoothprinter
 
+import android.util.Log
 import com.getcapacitor.JSObject
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -8,10 +9,17 @@ import java.util.Locale
 import java.util.TimeZone
 
 /**
- * Builds ESC/POS byte sequences for 58mm (32 chars) and 80mm (48 chars)
- * thermal printers. All text is encoded as UTF-8.
+ * Builds ESC/POS byte sequences for generic 58mm and 80mm thermal printers.
+ *
+ * Text helpers (text/align/bold/center/wrap) remain for the diagnostic test
+ * print and for raw-text callers. Receipt printing goes through the Unicode
+ * bitmap renderer ([ReceiptBitmapRenderer]) and the generic GS v 0 raster
+ * command, so Marathi/Devanagari prints correctly on any ESC/POS bitmap
+ * capable printer without relying on a printer code page.
  */
 object EscPosBuilder {
+
+    private const val TAG = "EscPosBuilder"
 
     private val utf8: Charset = Charsets.UTF_8
 
@@ -41,6 +49,29 @@ object EscPosBuilder {
 
     private fun MutableList<Byte>.feed(lines: Int) {
         repeat(lines) { add(0x0A) }
+    }
+
+    /**
+     * Generic ESC/POS raster image (GS v 0): one raster command per printed
+     * row keeps every frame small, so small Bluetooth stacks never have to
+     * buffer a huge image. This works on any ESC/POS bitmap capable printer
+     * and contains no printer-brand-specific bytes.
+     */
+    private fun MutableList<Byte>.rasterImage(image: ReceiptBitmapRenderer.RasterImage) {
+        val data = image.bytes
+        for (row in 0 until image.heightDots) {
+            raw(
+                byteArrayOf(
+                    0x1D, 0x76, 0x30, 0x30, // GS v 0, mode '0' (1:1)
+                    image.bytesPerLine.toByte(), 0x00, // xL xH (bytes per row)
+                    0x01, 0x00 // yL yH (one row per command)
+                )
+            )
+            val offset = row * image.bytesPerLine
+            for (i in 0 until image.bytesPerLine) {
+                add(data[offset + i])
+            }
+        }
     }
 
     private fun MutableList<Byte>.cut() {
@@ -131,64 +162,22 @@ object EscPosBuilder {
     }
 
     /**
-     * Renders the structured receipt lines produced by the shared JS receipt
-     * template. Bold/alignment come from the line metadata, so the printed
-     * receipt always matches the WhatsApp/PDF/details-page layout.
+     * Prints the receipt as a Unicode bitmap so Devanagari/Marathi, Latin,
+     * digits and the rupee symbol print correctly on any generic ESC/POS
+     * raster-capable printer. The shared JS receipt template provides the
+     * content; the bitmap renderer adds the printer-only developer footer.
      */
     fun receipt(receipt: JSObject): ByteArray {
-        val width = when (receipt.optInt("paperWidth", 58)) {
-            80 -> 48
-            else -> 32
-        }
-
-        val lines = receipt.optJSONArray("lines") ?: return build {
-            initialize()
-            feed(3)
-            cut()
+        val image = try {
+            ReceiptBitmapRenderer.renderReceipt(receipt)
+        } catch (e: Exception) {
+            Log.e(TAG, "Receipt bitmap rendering failed", e)
+            throw RuntimeException("Receipt could not be rendered", e)
         }
 
         return build {
             initialize()
-
-            for (i in 0 until lines.length()) {
-                val line = lines.optJSONObject(i) ?: continue
-                val align = line.optString("align", "left")
-                val segments = line.optJSONArray("segments")
-
-                if (segments == null || segments.length() == 0) {
-                    spacer()
-                    continue
-                }
-
-                val isEmpty = (0 until segments.length()).all { j ->
-                    segments.optJSONObject(j)?.optString("text", "")?.isBlank() != false
-                }
-
-                if (isEmpty) {
-                    spacer()
-                    continue
-                }
-
-                align(if (align == "center") 1 else 0)
-
-                for (j in 0 until segments.length()) {
-                    val segment = segments.optJSONObject(j) ?: continue
-                    val text = segment.optString("text", "")
-                    val bold = segment.optBoolean("bold", false)
-
-                    bold(bold)
-
-                    val rendered = wrap(text, width)
-                    if (align == "center") {
-                        rendered.forEach { text(center(it, width)) }
-                    } else {
-                        rendered.forEach { text(it) }
-                    }
-
-                    bold(false)
-                }
-            }
-
+            rasterImage(image)
             feed(3)
             cut()
         }
