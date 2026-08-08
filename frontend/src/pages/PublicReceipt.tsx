@@ -22,20 +22,20 @@ interface PublicReceiptData {
 }
 
 export function PublicReceipt() {
-  const { token } = useParams<{ token: string }>();
+  const { receiptNo } = useParams<{ receiptNo: string }>();
   const [receipt, setReceipt] = useState<PublicReceiptData | null>(null);
   const [error, setError] = useState(false);
 
-  const isToken = token ? RECEIPT_TOKEN_PATTERN.test(token) : false;
+  const isToken = receiptNo ? RECEIPT_TOKEN_PATTERN.test(receiptNo) : false;
 
   useEffect(() => {
-    if (!isToken || !token) return;
+    if (!isToken || !receiptNo) return;
 
     let active = true;
     setError(false);
     setReceipt(null);
 
-    fetch(`${API_BASE_URL}/api/receipt/${encodeURIComponent(token)}`)
+    fetch(`${API_BASE_URL}/api/receipt/${encodeURIComponent(receiptNo)}`)
       .then(async (response) => {
         if (!response.ok) throw new Error('Receipt not found');
         const data = (await response.json()) as { receipt: PublicReceiptData };
@@ -48,19 +48,18 @@ export function PublicReceipt() {
     return () => {
       active = false;
     };
-  }, [token, isToken]);
+  }, [receiptNo, isToken]);
 
-  if (!token) {
+  if (!receiptNo) {
     return <Navigate to="/" replace />;
   }
 
   if (!isToken) {
     // Collector receipt page: same URL and layout as before, but rendered
-    // here so the /receipt/:token public route can share the path.
+    // here so the /receipt/:receiptNo public route can share the path.
     return (
       <Routes>
         <Route
-          path="/receipt/:receiptNo"
           element={
             <CollectorRoute>
               <CollectorLayout />

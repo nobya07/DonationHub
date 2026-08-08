@@ -154,7 +154,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          <Route path="/receipt/:token" element={<PublicReceipt />} />
+          <Route path="/receipt/:receiptNo/*" element={<PublicReceipt />} />
 
           <Route
             path="/admin"
