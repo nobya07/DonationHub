@@ -183,7 +183,7 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label="Today's Collection"
           value={formatCurrency(todayTotal)}
@@ -216,9 +216,9 @@ export function Dashboard() {
         />
       </div>
 
-      <Card padding="sm">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-surface-raised">
+      <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2">
+        <Card padding="sm" className="h-full">
+          <div className="flex h-full flex-col items-start gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Printer Status</span>
             {isNative ? (
               printerStatus ? (
@@ -235,12 +235,14 @@ export function Dashboard() {
               <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
             )}
           </div>
-          <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-surface-raised">
+        </Card>
+        <Card padding="sm" className="h-full">
+          <div className="flex h-full flex-col items-start gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Network Status</span>
             <StatusPill online={isOnline} label={isOnline ? 'Online' : 'Offline'} />
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       <Card padding="md">
         <div className="mb-3 flex items-center justify-between">
